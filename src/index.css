@@ -1,0 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
+@import 'tailwindcss';
+
+:root {
+  --cream: #F5F3EE;
+  --cream-light: #FAF9F7;
+  --cream-dark: #EDE9E2;
+  --teal: #1A4A38;
+  --teal-light: #2D7A5E;
+  --teal-pale: #E8F5EE;
+  --border: #E5E1D8;
+  --text: #1A1A18;
+  --text-muted: #6B6864;
+  --text-faint: #9A9690;
+}
+
+* {
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  width: 100%;
+  min-height: 100%;
+  background: #0E1210;
+}
+
+body {
+  overscroll-behavior: none;
+}
+
+.app-viewport {
+  overflow: hidden;
+}
+
+.app-scroll {
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.bottom-nav {
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+}
+
+.phone-shell {
+  max-width: 390px;
+  height: 844px;
+  max-height: calc(100dvh - 4rem);
+  border-radius: 48px;
+  overflow: hidden;
+  box-shadow: 0 48px 96px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+@media (max-width: 480px), (display-mode: standalone), (display-mode: fullscreen) {
+  html,
+  body,
+  #root {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  body {
+    position: fixed;
+    inset: 0;
+  }
+
+  .app-viewport {
+    width: 100%;
+    height: 100dvh;
+    min-height: 0;
+    padding: 0;
+  }
+
+  .phone-shell {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+html.ios-installed .phone-shell {
+  border-radius: clamp(22px, 7vw, 30px) clamp(22px, 7vw, 30px) 0 0;
+}
+
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+.status-paid   { background: #E8F5EE; color: #1A6B4A; }
+.status-due    { background: #FEF2EE; color: #C94A2E; }
+.status-future { background: #F0EFED; color: #9A9690; }
+
+.dot-paid   { background: #1A6B4A; }
+.dot-due    { background: #C94A2E; }
+.dot-future { background: #C0BAB2; }

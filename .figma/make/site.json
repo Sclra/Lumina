@@ -1,0 +1,14 @@
+{
+  "title": "The Lumina Residences",
+  "description": "Resident services, payments, reservations, and building updates for The Lumina Residences.",
+  "icons": {
+    "icon": "/icons/icon-192.png"
+  },
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
