@@ -13,6 +13,34 @@ export interface NewsItem {
   content: string;
 }
 
+const NEWS_MONTHS: Record<string, number> = {
+  Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+  Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
+};
+
+export function parseNewsDate(value: string): Date | null {
+  const match = value.trim().match(/^([A-Za-z]{3})\s+(\d{1,2}),\s+(\d{4})$/);
+  if (!match) return null;
+
+  const month = NEWS_MONTHS[match[1]];
+  if (month === undefined) return null;
+
+  const parsed = new Date(Number(match[3]), month, Number(match[2]));
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+export function newsDateTimestamp(value: string): number {
+  return parseNewsDate(value)?.getTime() ?? 0;
+}
+
+export function isNewsDateToday(value: string, today = new Date()): boolean {
+  const date = parseNewsDate(value);
+  return date !== null
+    && date.getFullYear() === today.getFullYear()
+    && date.getMonth() === today.getMonth()
+    && date.getDate() === today.getDate();
+}
+
 export const newsData: NewsItem[] = [
   {
     id: 1, category: 'Water', title: 'Scheduled Water Main Maintenance',

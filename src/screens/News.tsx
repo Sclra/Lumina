@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { NavProps } from '../App';
 import { useTheme } from '../theme';
 import { useLang } from '../lang';
-import { newsData, type NewsCategory, type NewsItem } from '../data/newsData';
+import { newsData, newsDateTimestamp, type NewsCategory, type NewsItem } from '../data/newsData';
 import { useManagerContext } from '../managerStore';
 
 const catColor: Record<string, string> = {
@@ -52,11 +52,15 @@ export default function News({ navigate }: NavProps) {
 
   const allNews = [...newsData, ...approvedItems];
 
-  const filtered = activeCategory === 'All'
+  const categoryItems = activeCategory === 'All'
     ? allNews
     : activeCategory === 'Golden'
       ? allNews.filter(n => n.golden)
       : allNews.filter(n => n.category === activeCategory);
+
+  const filtered = [...categoryItems].sort((a, b) =>
+    newsDateTimestamp(b.date) - newsDateTimestamp(a.date) || b.id - a.id
+  );
 
   return (
     <div style={{ background: t.bg, minHeight: '100%', paddingBottom: 80, transition: 'background 0.3s', position: 'relative' }}>

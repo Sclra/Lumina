@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
 export interface ThemeTokens {
   bg: string;
@@ -77,8 +77,15 @@ const ThemeContext = createContext<ThemeCtx>({
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [darkMode, setDarkMode] = useState(false);
+  const theme = darkMode ? dark : light;
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--app-background', theme.bg);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme.bg);
+  }, [theme.bg]);
+
   return (
-    <ThemeContext.Provider value={{ darkMode, setDarkMode, t: darkMode ? dark : light }}>
+    <ThemeContext.Provider value={{ darkMode, setDarkMode, t: theme }}>
       {children}
     </ThemeContext.Provider>
   );

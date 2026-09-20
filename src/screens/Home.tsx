@@ -1,7 +1,7 @@
 import type { NavProps } from '../App';
 import { useTheme } from '../theme';
 import { useLang } from '../lang';
-import { newsData } from '../data/newsData';
+import { isNewsDateToday, newsData } from '../data/newsData';
 
 const catColor: Record<string, string> = {
   Water: '#2D7A9E', Gas: '#8A5E3A', Energy: '#7A5EA0', General: '#5E7A3A', Golden: '#B8860B',
@@ -9,13 +9,13 @@ const catColor: Record<string, string> = {
 
 const GOLDEN_GRADIENT = 'linear-gradient(135deg, #B8860B 0%, #DAA520 50%, #B8860B 100%)';
 
-// Latest news = all items sorted by id desc, first 3
-const latestNews = [...newsData].sort((a, b) => b.id - a.id).slice(0, 3);
-
 export default function Home({ navigate }: NavProps) {
   const { t } = useTheme();
   const { tr } = useLang();
   const s = (style: object) => ({ ...style, transition: 'background 0.3s, border-color 0.3s, color 0.3s' });
+  const todayNews = newsData
+    .filter(item => isNewsDateToday(item.date))
+    .sort((a, b) => Number(b.golden) - Number(a.golden) || b.id - a.id);
 
   return (
     <div style={{ background: t.bg, minHeight: '100%', paddingBottom: 16 }}>
@@ -104,7 +104,20 @@ export default function Home({ navigate }: NavProps) {
           <p style={{ fontSize: 11, fontWeight: 600, color: t.textFaint, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{tr('home_latest_news')}</p>
           <button onClick={() => navigate('news')} style={{ fontSize: 12, color: t.primary, fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer' }}>{tr('btn_view_all')}</button>
         </div>
-        {latestNews.map((item) => {
+        {todayNews.length === 0 && (
+          <div style={s({
+            background: t.card,
+            border: `1.5px solid ${t.cardBorder}`,
+            borderRadius: 14,
+            padding: '18px 16px',
+            color: t.textFaint,
+            fontSize: 12,
+            textAlign: 'center',
+          })}>
+            {tr('home_no_news_today')}
+          </div>
+        )}
+        {todayNews.map((item) => {
           const isGolden = item.golden;
           const color = isGolden ? '#B8860B' : (catColor[item.category] || t.textMuted);
           return (

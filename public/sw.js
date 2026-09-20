@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lumina-residences-v3'
+const CACHE_NAME = 'lumina-residences-v7'
 const APP_SHELL = [
   '/',
   '/manifest.webmanifest',

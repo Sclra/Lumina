@@ -2,6 +2,7 @@
 @import 'tailwindcss';
 
 :root {
+  --app-background: #F5F3EE;
   --cream: #F5F3EE;
   --cream-light: #FAF9F7;
   --cream-dark: #EDE9E2;
@@ -87,8 +88,21 @@ body {
   }
 }
 
-html.ios-installed .phone-shell {
-  border-radius: clamp(22px, 7vw, 30px) clamp(22px, 7vw, 30px) 0 0;
+html.installed-app .phone-shell {
+  padding-top: env(safe-area-inset-top);
+}
+
+html.installed-app .phone-shell::before {
+  position: absolute;
+  z-index: 10;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: env(safe-area-inset-top);
+  background: var(--app-background);
+  transition: background 0.3s;
+  content: '';
+  pointer-events: none;
 }
 
 .scrollbar-hide::-webkit-scrollbar { display: none; }

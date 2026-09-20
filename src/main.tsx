@@ -4,15 +4,12 @@ import App from './App'
 import './index.css'
 
 const standaloneNavigator = navigator as Navigator & { standalone?: boolean }
-const isIOS =
-  /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
 const isInstalled =
   window.matchMedia('(display-mode: standalone)').matches ||
   window.matchMedia('(display-mode: fullscreen)').matches ||
   standaloneNavigator.standalone === true
 
-document.documentElement.classList.toggle('ios-installed', isIOS && isInstalled)
+document.documentElement.classList.toggle('installed-app', isInstalled)
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
