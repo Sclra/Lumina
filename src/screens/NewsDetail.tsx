@@ -1,13 +1,14 @@
 import type { NavProps } from '../App';
 import { useTheme } from '../theme';
 import { useLang } from '../lang';
-import { newsData } from '../data/newsData';
+import usePublishedNews from '../data/usePublishedNews';
 
 const catColor: Record<string, string> = { Water: '#2D7A9E', Gas: '#8A5E3A', Energy: '#7A5EA0', General: '#5E7A3A' };
 
 export default function NewsDetail({ goBack, params }: NavProps) {
   const { t } = useTheme();
   const { tr, isRTL } = useLang();
+  const newsData = usePublishedNews();
   const id = params.newsId ?? 1;
   const item = newsData.find(n => n.id === id) ?? newsData[0];
 

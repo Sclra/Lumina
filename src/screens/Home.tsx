@@ -2,13 +2,8 @@ import { useRef, type PointerEvent } from 'react';
 import type { Amenity, NavProps } from '../App';
 import { useTheme } from '../theme';
 import { useLang } from '../lang';
-import { isNewsDateToday, newsData } from '../data/newsData';
-
-const catColor: Record<string, string> = {
-  Water: '#2D7A9E', Gas: '#8A5E3A', Energy: '#7A5EA0', General: '#5E7A3A', Golden: '#B8860B',
-};
-
-const GOLDEN_GRADIENT = 'linear-gradient(135deg, #B8860B 0%, #DAA520 50%, #B8860B 100%)';
+import { newsDateTimestamp } from '../data/newsData';
+import usePublishedNews from '../data/usePublishedNews';
 
 export default function Home({ navigate }: NavProps) {
   const { t, darkMode } = useTheme();
@@ -23,9 +18,9 @@ export default function Home({ navigate }: NavProps) {
     }
   };
   const s = (style: object) => ({ ...style, transition: 'background 0.3s, border-color 0.3s, color 0.3s' });
-  const todayNews = newsData
-    .filter(item => isNewsDateToday(item.date))
-    .sort((a, b) => Number(b.golden) - Number(a.golden) || b.id - a.id);
+  const goldenNews = usePublishedNews()
+    .filter(item => item.golden)
+    .sort((a, b) => newsDateTimestamp(b.date) - newsDateTimestamp(a.date) || b.id - a.id);
 
   return (
     <div style={{ background: t.bg, minHeight: '100%', paddingBottom: 16 }}>
@@ -152,45 +147,29 @@ export default function Home({ navigate }: NavProps) {
           <p style={{ fontSize: 11, fontWeight: 600, color: t.textFaint, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{tr('home_latest_news')}</p>
           <button onClick={() => navigate('news')} style={{ fontSize: 12, color: t.primary, fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer' }}>{tr('btn_view_all')}</button>
         </div>
-        {todayNews.length === 0 && (
-          <div style={s({
-            background: t.card,
-            border: `1.5px solid ${t.cardBorder}`,
-            borderRadius: 14,
-            padding: '18px 16px',
-            color: t.textFaint,
-            fontSize: 12,
-            textAlign: 'center',
-          })}>
-            {tr('home_no_news_today')}
-          </div>
-        )}
-        {todayNews.map((item) => {
-          const isGolden = item.golden;
-          const color = isGolden ? '#B8860B' : (catColor[item.category] || t.textMuted);
-          return (
-            <div key={item.id} onClick={() => navigate('news-detail', { newsId: item.id })}
-              style={s({
-                background: t.card,
-                border: isGolden ? `1.5px solid #DAA52040` : `1.5px solid ${t.cardBorder}`,
-                borderLeft: isGolden ? `4px solid #DAA520` : item.featured ? `4px solid ${t.paidDot}` : `1.5px solid ${t.cardBorder}`,
-                borderRadius: 14, padding: '13px 14px', marginBottom: 10, cursor: 'pointer',
-              })}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
-                {isGolden ? (
-                  <span style={{ fontSize: 10, fontWeight: 700, color: '#B8860B', letterSpacing: '0.08em', display: 'flex', alignItems: 'center', gap: 3 }}>
-                    ★ {tr('news_cat_golden').toUpperCase()}
-                  </span>
-                ) : (
-                  <span style={{ fontSize: 10, fontWeight: 700, color, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{item.category}</span>
-                )}
-                <span style={{ fontSize: 10, color: t.textFaint }}>•</span>
-                <span style={{ fontSize: 10, color: t.textFaint }}>{item.date}</span>
-              </div>
-              <p style={{ fontSize: 13, fontWeight: 600, color: t.text, lineHeight: 1.4 }}>{item.title}</p>
-            </div>
-          );
-        })}
+        <div tabIndex={0} role="region" aria-label={tr('home_latest_news')}
+          style={{ maxHeight: 240, overflowY: 'auto', padding: 2 }}>
+          {goldenNews.length === 0 && (
+            <p style={{ background: t.card, border: `1.5px solid ${t.cardBorder}`, borderRadius: 14, padding: '18px 16px', color: t.textMuted, fontSize: 12, textAlign: 'center' }}>
+              {tr('home_no_golden_news')}
+            </p>
+          )}
+          {goldenNews.map(item => (
+            <button key={item.id} type="button" onClick={() => navigate('news-detail', { newsId: item.id })}
+              style={s({ display: 'block', width: '100%', textAlign: 'start', background: t.card,
+                border: '1.5px solid #DAA52040', borderInlineStart: '4px solid #DAA520',
+                borderRadius: 14, padding: '13px 14px', marginBottom: 10, cursor: 'pointer' })}>
+              <span style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginBottom: 5 }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: darkMode ? '#F5C76B' : '#855600', letterSpacing: '0.08em' }}>
+                  ? {tr('news_cat_golden').toUpperCase()}
+                </span>
+                <span style={{ fontSize: 10, color: t.textMuted }}>? {item.date}</span>
+              </span>
+              <span style={{ display: 'block', fontSize: 13, fontWeight: 600, color: t.text, lineHeight: 1.4 }}>{item.title}</span>
+              <span style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', fontSize: 12, color: t.textMuted, lineHeight: 1.5, marginTop: 6 }}>{item.desc}</span>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );

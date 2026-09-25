@@ -2,8 +2,8 @@ import { useState } from 'react';
 import type { NavProps } from '../App';
 import { useTheme } from '../theme';
 import { useLang } from '../lang';
-import { newsData, newsDateTimestamp, type NewsCategory, type NewsItem } from '../data/newsData';
-import { useManagerContext } from '../managerStore';
+import { newsDateTimestamp, type NewsCategory } from '../data/newsData';
+import usePublishedNews from '../data/usePublishedNews';
 
 const catColor: Record<string, string> = {
   Water: '#2D7A9E', Gas: '#8A5E3A', Energy: '#7A5EA0', General: '#5E7A3A',
@@ -23,7 +23,7 @@ const GOLDEN_GRADIENT = 'linear-gradient(135deg, #B8860B 0%, #DAA520 50%, #B8860
 export default function News({ navigate }: NavProps) {
   const { t, darkMode } = useTheme();
   const { tr } = useLang();
-  const { newsSubmissions } = useManagerContext();
+  const allNews = usePublishedNews();
   const [activeCategory, setActiveCategory] = useState<NewsCategory>('All');
 
   const CATEGORIES: { key: NewsCategory; label: string }[] = [
@@ -34,23 +34,6 @@ export default function News({ navigate }: NavProps) {
     { key: 'Energy',  label: tr('news_cat_energy') },
     { key: 'General', label: tr('news_cat_general') },
   ];
-
-  const approvedItems: NewsItem[] = newsSubmissions
-    .filter(s => s.status === 'approved')
-    .map(s => ({
-      id: 10000 + s.id,
-      category: s.category,
-      title: s.title,
-      date: s.submittedAt,
-      desc: s.description,
-      image: null,
-      featured: false,
-      golden: s.golden,
-      read: false,
-      content: s.description,
-    }));
-
-  const allNews = [...newsData, ...approvedItems];
 
   const categoryItems = activeCategory === 'All'
     ? allNews
