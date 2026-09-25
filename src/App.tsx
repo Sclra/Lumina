@@ -45,7 +45,7 @@ export type Screen =
   | 'm-team' | 'm-staff-new';
 
 export type PaymentType = 'apartment' | 'water' | 'energy';
-export type Amenity = 'gym' | 'rooftop' | 'pool';
+export type Amenity = 'gym' | 'rooftop' | 'pool' | 'guest-parking' | 'community-hall';
 
 export interface NavParams {
   paymentType?: PaymentType;
