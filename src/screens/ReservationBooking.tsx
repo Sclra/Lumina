@@ -3,8 +3,9 @@ import type { NavProps, Amenity } from '../App';
 import { useTheme } from '../theme';
 import { useLang } from '../lang';
 
-const amenityNameKey: Record<Amenity, 'reservations_gym' | 'reservations_rooftop' | 'reservations_pool'> = {
-  gym: 'reservations_gym', rooftop: 'reservations_rooftop', pool: 'reservations_pool'
+const amenityNameKey: Record<Amenity, 'reservations_gym' | 'reservations_rooftop' | 'reservations_pool' | 'home_guest_parking' | 'home_community_hall'> = {
+  gym: 'reservations_gym', rooftop: 'reservations_rooftop', pool: 'reservations_pool',
+  'guest-parking': 'home_guest_parking', 'community-hall': 'home_community_hall'
 };
 const DAYS_DATA = [{ date: 12 }, { date: 13 }, { date: 14 }, { date: 15 }, { date: 16 }];
 const TIME_SLOTS = ['9:00 AM','10:00 AM','11:00 AM','2:00 PM','3:00 PM','4:00 PM'];
