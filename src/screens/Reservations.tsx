@@ -6,6 +6,8 @@ const amenities = [
   { id: 'gym' as Amenity, nameKey: 'reservations_gym' as const, availKey: 'reservations_gym_avail' as const, bookKey: 'reservations_gym_book' as const, descKey: 'reservations_gym_desc' as const, image: 'https://images.unsplash.com/photo-1758448756350-3d0eec02ba37?w=600&h=280&fit=crop&auto=format', status: 'available' },
   { id: 'rooftop' as Amenity, nameKey: 'reservations_rooftop' as const, availKey: 'reservations_rooftop_avail' as const, bookKey: 'reservations_rooftop_book' as const, descKey: 'reservations_rooftop_desc' as const, image: 'https://images.unsplash.com/photo-1493246318656-5bfd4cfb29b8?w=600&h=280&fit=crop&auto=format', status: 'reserved' },
   { id: 'pool' as Amenity, nameKey: 'reservations_pool' as const, availKey: 'reservations_pool_avail' as const, bookKey: 'reservations_pool_book' as const, descKey: 'reservations_pool_desc' as const, image: 'https://images.unsplash.com/photo-1680609989998-6183fcea718b?w=600&h=280&fit=crop&auto=format', status: 'full' },
+  { id: 'guest-parking' as Amenity, nameKey: 'home_guest_parking' as const, availKey: 'word_open' as const, bookKey: 'booking_two_weeks' as const, descKey: 'reservations_parking_desc' as const, image: `${import.meta.env.BASE_URL}images/guest-parking.jpg`, status: 'available' },
+  { id: 'community-hall' as Amenity, nameKey: 'home_community_hall' as const, availKey: 'word_open' as const, bookKey: 'booking_two_weeks' as const, descKey: 'reservations_hall_desc' as const, image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600&h=320&fit=crop&auto=format', status: 'available' },
 ] as const;
 
 export default function Reservations({ navigate }: NavProps) {
@@ -24,7 +26,7 @@ export default function Reservations({ navigate }: NavProps) {
         {amenities.map((a) => (
           <div key={a.id} style={{ background: t.card, border: `1.5px solid ${t.cardBorder}`, borderRadius: 20, overflow: 'hidden', marginBottom: 14, transition: 'background 0.3s' }}>
             <div style={{ position: 'relative', height: 160, background: t.bgAlt }}>
-              <img src={a.image} alt={tr(a.nameKey)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              {a.image ? <img src={a.image} alt={tr(a.nameKey)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ height: '100%', display: 'grid', placeItems: 'center', color: t.primary, fontSize: 36 }} aria-hidden="true">{a.id === 'guest-parking' ? 'P' : '?'}</div>}
               {a.status === 'reserved' && (
                 <div style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(20,28,24,0.82)', backdropFilter: 'blur(8px)', color: '#FFFFFF', fontSize: 10, fontWeight: 700, padding: '4px 12px', borderRadius: 20, letterSpacing: '0.08em' }}>{tr('word_reserved')}</div>
               )}
@@ -42,8 +44,8 @@ export default function Reservations({ navigate }: NavProps) {
                   </div>
                 </div>
                 <button
-                  onClick={() => a.status !== 'full' && navigate('reservation-booking', { amenity: a.id })}
-                  style={{ padding: '8px 18px', borderRadius: 20, background: a.status === 'full' ? t.mutedSurface : t.primary, color: a.status === 'full' ? t.textFaint : '#FFFFFF', fontWeight: 600, fontSize: 13, border: `1px solid ${a.status === 'full' ? t.cardBorder : 'transparent'}`, cursor: a.status === 'full' ? 'not-allowed' : 'pointer', flexShrink: 0 }}>
+                  onClick={() => navigate('reservation-booking', { amenity: a.id })}
+                  style={{ padding: '8px 18px', borderRadius: 20, background: t.primary, color: '#FFFFFF', fontWeight: 600, fontSize: 13, border: '1px solid transparent', cursor: 'pointer', flexShrink: 0 }}>
                   {tr('reservations_reserve')}
                 </button>
               </div>
