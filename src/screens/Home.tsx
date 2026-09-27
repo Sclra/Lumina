@@ -147,7 +147,7 @@ export default function Home({ navigate }: NavProps) {
           <p style={{ fontSize: 11, fontWeight: 600, color: t.textFaint, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{tr('home_latest_news')}</p>
           <button onClick={() => navigate('news')} style={{ fontSize: 12, color: t.primary, fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer' }}>{tr('btn_view_all')}</button>
         </div>
-        <div tabIndex={0} role="region" aria-label={tr('home_latest_news')}
+        <div className="scrollbar-hide" tabIndex={0} role="region" aria-label={tr('home_latest_news')}
           style={{ maxHeight: 240, overflowY: 'auto', padding: 2 }}>
           {goldenNews.length === 0 && (
             <p style={{ background: t.card, border: `1.5px solid ${t.cardBorder}`, borderRadius: 14, padding: '18px 16px', color: t.textMuted, fontSize: 12, textAlign: 'center' }}>
@@ -160,10 +160,10 @@ export default function Home({ navigate }: NavProps) {
                 border: '1.5px solid #DAA52040', borderInlineStart: '4px solid #DAA520',
                 borderRadius: 14, padding: '13px 14px', marginBottom: 10, cursor: 'pointer' })}>
               <span style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginBottom: 5 }}>
-                <span style={{ fontSize: 10, fontWeight: 700, color: darkMode ? '#F5C76B' : '#855600', letterSpacing: '0.08em' }}>
-                  ? {tr('news_cat_golden').toUpperCase()}
+                <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', color: '#B8860B', textTransform: 'uppercase', background: darkMode ? '#1A1400' : '#FDF6E3', padding: '2px 8px', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 3 }}>
+                  <span>★</span> {tr('news_cat_golden')}
                 </span>
-                <span style={{ fontSize: 10, color: t.textMuted }}>? {item.date}</span>
+                <span style={{ fontSize: 10, color: t.textMuted }}>• {item.date}</span>
               </span>
               <span style={{ display: 'block', fontSize: 13, fontWeight: 600, color: t.text, lineHeight: 1.4 }}>{item.title}</span>
               <span style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', fontSize: 12, color: t.textMuted, lineHeight: 1.5, marginTop: 6 }}>{item.desc}</span>
