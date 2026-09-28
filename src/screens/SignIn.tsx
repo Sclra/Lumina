@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import type { NavProps } from '../App';
 import { useTheme } from '../theme';
-import { useManager } from '../managerStore';
+import { useManager, type Role } from '../managerStore';
 import { useLang } from '../lang';
-
-type Role = 'resident' | 'manager';
 
 function BuildingIllustration({ dark }: { dark: boolean }) {
   const bld1 = dark ? '#1E2B26' : '#C8BFB0';
@@ -69,9 +67,9 @@ function BuildingIllustration({ dark }: { dark: boolean }) {
   );
 }
 
-export default function SignIn({ navigate }: NavProps) {
+export default function SignIn({ navigate, resetTo }: NavProps) {
   const { t, darkMode } = useTheme();
-  const { apartment } = useManager();
+  const { apartment, signInUser } = useManager();
   const { tr, isRTL } = useLang();
   const [role, setRole] = useState<Role>('resident');
   const [apartmentId, setApartmentId] = useState('');
@@ -84,15 +82,22 @@ export default function SignIn({ navigate }: NavProps) {
   const isManager = role === 'manager';
 
   const handleSignIn = () => {
-    if (!apartmentId || !password) {
+    const identifier = apartmentId.trim();
+    if (!identifier || !password) {
       setError(isManager ? tr('signin_error_manager') : tr('signin_error_resident'));
       return;
     }
     setError(''); setLoading(true);
     setTimeout(() => {
+      signInUser({
+        role,
+        name: identifier,
+        identifier,
+        email: identifier.includes('@') ? identifier : undefined,
+      });
       setLoading(false);
-      if (isManager) navigate(apartment ? 'm-dashboard' : 'm-setup');
-      else navigate('home');
+      if (isManager) resetTo(apartment ? 'm-dashboard' : 'm-setup');
+      else resetTo('home');
     }, 900);
   };
 

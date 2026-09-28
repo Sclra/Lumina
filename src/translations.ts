@@ -46,8 +46,8 @@ const en = {
   word_upcoming: 'Upcoming',
 
   /* ── Home ── */
-  home_hello: 'Hello, Sarah Jenkins',
-  home_unit: 'UNIT 402-B',
+  home_hello: 'Hello,',
+  profile_unit: 'Unit',
   home_amenity_status: 'Amenity Status',
   home_utilities: 'Utilities Overview',
   home_latest_news: 'Latest News',
@@ -64,7 +64,6 @@ const en = {
   home_energy_label: 'Energy Utility',
   home_energy_sub: 'October Statement',
   home_due_date: 'Due Date',
-  home_resident_since: 'Unit 402-B • Resident since 2023',
 
   /* ── News ── */
   news_title: 'News & Updates',
@@ -185,10 +184,6 @@ const en = {
   settings_logout: 'Logout',
   settings_search: 'Search settings...',
   settings_version: 'The Lumina Residences App v2.4.1',
-  settings_profile_resident: 'Sarah Jenkins',
-  settings_profile_resident_sub: 'Unit 402-B • Resident since 2023',
-  settings_profile_manager: 'Alex Morgan',
-  settings_profile_manager_sub: 'Property Manager • The Lumina Residences',
 
   /* ── Logout ── */
   logout_title: 'Sign Out?',
@@ -268,7 +263,7 @@ const en = {
   accounts_subtitle: 'Manage signed-in accounts',
   accounts_signed_in: 'Signed In',
   accounts_add: 'Add Account',
-  accounts_hint: 'Sign in with another account to switch between Resident and Manager roles.',
+  accounts_hint: 'Add another resident or manager account, then tap an account above to switch.',
   accounts_resident: 'Resident',
   accounts_manager: 'Manager',
 
@@ -469,6 +464,8 @@ const en = {
   m_news_message_field: 'Message',
   m_news_message_ph: 'Write the full announcement residents will read…',
   m_news_publish_btn: 'Publish to Residents',
+  m_news_golden_toggle: 'Golden news',
+  m_news_golden_hint: 'Also show this bulletin in Golden news',
 
   /* ── Manager News review ── */
   m_news_pending_review: 'Pending Review',
@@ -482,6 +479,8 @@ const en = {
   news_create_title: 'Create News',
   news_create_subtitle: 'Submit for manager review',
   news_create_field_title: 'Title',
+  news_create_title_ph: 'News title...',
+  news_create_desc_ph: 'Describe the news...',
   news_create_field_desc: 'Description',
   news_create_field_category: 'Category',
   news_create_submit: 'Submit for Review',
@@ -530,8 +529,8 @@ const fa: typeof en = {
   word_due_cap: 'معوق',
   word_upcoming: 'آتی',
 
-  home_hello: 'سلام، سارا جنکینز',
-  home_unit: 'واحد ۴۰۲-B',
+  home_hello: 'سلام،',
+  profile_unit: 'واحد',
   home_amenity_status: 'وضعیت امکانات',
   home_utilities: 'مرور خدمات',
   home_latest_news: 'آخرین اخبار',
@@ -548,7 +547,6 @@ const fa: typeof en = {
   home_energy_label: 'برق',
   home_energy_sub: 'صورتحساب مهر',
   home_due_date: 'تاریخ سررسید',
-  home_resident_since: 'واحد ۴۰۲-B • ساکن از ۱۴۰۲',
 
   news_title: 'اخبار و اطلاعیه‌ها',
   news_subtitle: 'اطلاعیه‌های رسمی مدیریت ساختمان',
@@ -660,10 +658,6 @@ const fa: typeof en = {
   settings_logout: 'خروج',
   settings_search: 'جستجو در تنظیمات...',
   settings_version: 'مجتمع لومینا نسخه ۲.۴.۱',
-  settings_profile_resident: 'سارا جنکینز',
-  settings_profile_resident_sub: 'واحد ۴۰۲-B • ساکن از ۱۴۰۲',
-  settings_profile_manager: 'الکس مورگان',
-  settings_profile_manager_sub: 'مدیر مجتمع • مجتمع لومینا',
 
   logout_title: 'خروج از حساب؟',
   logout_msg_resident: 'برای دسترسی مجدد به حساب ساکن خود باید دوباره وارد شوید.',
@@ -736,7 +730,7 @@ const fa: typeof en = {
   accounts_subtitle: 'مدیریت حساب‌های وارد شده',
   accounts_signed_in: 'وارد شده',
   accounts_add: 'افزودن حساب',
-  accounts_hint: 'با حساب دیگری وارد شوید تا بین نقش‌های ساکن و مدیر سوئیچ کنید.',
+  accounts_hint: 'حساب ساکن یا مدیر دیگری اضافه کنید، سپس برای جابه‌جایی روی حساب موردنظر بزنید.',
   accounts_resident: 'ساکن',
   accounts_manager: 'مدیر',
 
@@ -918,6 +912,8 @@ const fa: typeof en = {
   m_news_message_field: 'متن اطلاعیه',
   m_news_message_ph: 'متن کامل اطلاعیه‌ای که ساکنین خواهند خواند را بنویسید…',
   m_news_publish_btn: 'انتشار برای ساکنین',
+  m_news_golden_toggle: 'خبر طلایی',
+  m_news_golden_hint: 'این اطلاعیه در بخش اخبار طلایی هم نمایش داده شود',
 
   m_news_pending_review: 'در انتظار بررسی',
   m_news_pending_badge: 'در انتظار',
@@ -930,6 +926,8 @@ const fa: typeof en = {
   news_create_title: 'ایجاد خبر',
   news_create_subtitle: 'ارسال برای بررسی مدیر',
   news_create_field_title: 'عنوان',
+  news_create_title_ph: 'عنوان خبر...',
+  news_create_desc_ph: 'خبر را توضیح دهید...',
   news_create_field_desc: 'توضیحات',
   news_create_field_category: 'دسته‌بندی',
   news_create_submit: 'ارسال برای بررسی',

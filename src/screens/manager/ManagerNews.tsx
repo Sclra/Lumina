@@ -8,6 +8,7 @@ import { useLang } from '../../lang';
 const catColor: Record<string, string> = { Water: '#2D7A9E', Gas: '#8A5E3A', Energy: '#7A5EA0', General: '#5E7A3A' };
 const catBgLight: Record<string, string> = { Water: '#E8F2FA', Gas: '#F5EDE0', Energy: '#F3EEF8', General: '#EEF5E8' };
 const catBgDark: Record<string, string> = { Water: '#0A1E2A', Gas: '#1E160A', Energy: '#1A102A', General: '#0A1E10' };
+const categoryKeys = { Water: 'news_cat_water', Gas: 'news_cat_gas', Energy: 'news_cat_energy', General: 'news_cat_general' } as const;
 
 export default function ManagerNews({ navigate }: NavProps) {
   const { t, darkMode } = useTheme();
@@ -43,7 +44,7 @@ export default function ManagerNews({ navigate }: NavProps) {
             return (
               <div key={sub.id} style={{ background: t.card, border: `1.5px solid ${t.cardBorder}`, borderRadius: 16, padding: '14px 16px', marginBottom: 10, transition: 'background 0.3s' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 6 }}>
-                  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', color: catColor[sub.category], textTransform: 'uppercase', background: darkMode ? catBgDark[sub.category] : catBgLight[sub.category], padding: '2px 8px', borderRadius: 8 }}>{sub.category}</span>
+                  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', color: catColor[sub.category], textTransform: 'uppercase', background: darkMode ? catBgDark[sub.category] : catBgLight[sub.category], padding: '2px 8px', borderRadius: 8 }}>{tr(categoryKeys[sub.category])}</span>
                   <span style={{ fontSize: 10, color: t.textFaint }}>•</span>
                   <span style={{ fontSize: 11, color: t.textFaint }}>{sub.submittedAt}</span>
                   <span style={{ marginLeft: 'auto', fontSize: 9, fontWeight: 700, color: '#B8860B', background: darkMode ? '#1A1400' : '#FDF6E3', padding: '2px 8px', borderRadius: 8, textTransform: 'uppercase' }}>{tr('m_news_pending_badge')}</span>
@@ -95,7 +96,8 @@ export default function ManagerNews({ navigate }: NavProps) {
         {announcements.map(a => (
           <div key={a.id} style={{ background: t.card, border: `1.5px solid ${t.cardBorder}`, borderRadius: 16, padding: '14px 16px', marginBottom: 10, transition: 'background 0.3s' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 7 }}>
-              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', color: catColor[a.category], textTransform: 'uppercase', background: darkMode ? catBgDark[a.category] : catBgLight[a.category], padding: '2px 8px', borderRadius: 8 }}>{a.category}</span>
+              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', color: catColor[a.category], textTransform: 'uppercase', background: darkMode ? catBgDark[a.category] : catBgLight[a.category], padding: '2px 8px', borderRadius: 8 }}>{tr(categoryKeys[a.category])}</span>
+              {a.golden && <span style={{ fontSize: 9, fontWeight: 700, color: '#B8860B', background: darkMode ? '#1A1400' : '#FDF6E3', padding: '2px 8px', borderRadius: 8 }}>★ {tr('news_cat_golden')}</span>}
               <span style={{ fontSize: 10, color: t.textFaint }}>•</span>
               <span style={{ fontSize: 11, color: t.textFaint }}>{a.date}</span>
               <span style={{ marginLeft: 'auto', fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', color: t.paidText, background: t.paidBg, padding: '2px 8px', borderRadius: 8, textTransform: 'uppercase' }}>{tr('m_news_published_badge')}</span>

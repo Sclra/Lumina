@@ -9,8 +9,8 @@ const CATEGORIES: Category[] = ['Water', 'Gas', 'Energy', 'General'];
 
 export default function NewsCreate({ goBack }: NavProps) {
   const { t } = useTheme();
-  const { tr } = useLang();
-  const { addNewsSubmission } = useManagerContext();
+  const { tr, isRTL } = useLang();
+  const { addNewsSubmission, currentUser } = useManagerContext();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -29,6 +29,8 @@ export default function NewsCreate({ goBack }: NavProps) {
     boxSizing: 'border-box',
     transition: 'border-color 0.2s',
     fontFamily: 'inherit',
+    direction: isRTL ? 'rtl' : 'ltr',
+    textAlign: 'start',
   };
 
   const handleSubmit = () => {
@@ -37,7 +39,7 @@ export default function NewsCreate({ goBack }: NavProps) {
       title: title.trim(),
       description: description.trim(),
       category,
-      submittedBy: 'Resident',
+      submittedBy: currentUser?.role === 'resident' ? currentUser.name : tr('accounts_resident'),
       submittedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
     });
     setSubmitted(true);
@@ -65,10 +67,10 @@ export default function NewsCreate({ goBack }: NavProps) {
       {/* Header */}
       <div style={{ padding: '16px 24px 14px' }}>
         <button onClick={goBack} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.primary} strokeWidth="2" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.primary} strokeWidth="2" strokeLinecap="round" style={{ transform: isRTL ? 'scaleX(-1)' : undefined }}><path d="M15 18l-6-6 6-6"/></svg>
           <span style={{ fontSize: 13, color: t.primary, fontWeight: 500 }}>{tr('btn_back')}</span>
         </button>
-        <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', color: t.primary, textTransform: 'uppercase', marginBottom: 4 }}>News</p>
+        <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', color: t.primary, textTransform: 'uppercase', marginBottom: 4 }}>{tr('news_title')}</p>
         <h1 style={{ fontSize: 26, fontWeight: 700, color: t.text, marginBottom: 4 }}>{tr('news_create_title')}</h1>
         <p style={{ fontSize: 13, color: t.textFaint }}>{tr('news_create_subtitle')}</p>
       </div>
@@ -84,7 +86,7 @@ export default function NewsCreate({ goBack }: NavProps) {
             type="text"
             value={title}
             onChange={e => setTitle(e.target.value)}
-            placeholder="News title..."
+            placeholder={tr('news_create_title_ph')}
             style={inputStyle}
           />
         </div>
@@ -97,7 +99,7 @@ export default function NewsCreate({ goBack }: NavProps) {
           <textarea
             value={description}
             onChange={e => setDescription(e.target.value)}
-            placeholder="Describe the news..."
+            placeholder={tr('news_create_desc_ph')}
             rows={4}
             style={{ ...inputStyle, resize: 'none' }}
           />
@@ -125,7 +127,7 @@ export default function NewsCreate({ goBack }: NavProps) {
                   transition: 'all 0.2s',
                 }}
               >
-                {cat}
+                {tr(`news_cat_${cat.toLowerCase()}` as 'news_cat_water' | 'news_cat_gas' | 'news_cat_energy' | 'news_cat_general')}
               </button>
             ))}
           </div>

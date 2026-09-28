@@ -2,9 +2,10 @@ export type NewsCategory = 'All' | 'Water' | 'Gas' | 'Energy' | 'General' | 'Gol
 
 export interface NewsItem {
   id: number;
-  category: Exclude<NewsCategory, 'All'>;
+  category: Exclude<NewsCategory, 'All' | 'Golden'>;
   title: string;
   date: string;
+  publishedAt?: number;
   desc: string;
   image: string | null;
   featured: boolean;
@@ -31,6 +32,22 @@ export function parseNewsDate(value: string): Date | null {
 
 export function newsDateTimestamp(value: string): number {
   return parseNewsDate(value)?.getTime() ?? 0;
+}
+
+// Bundled samples have display dates but no real publication timestamp.
+export function compareNewsNewestFirst(a: NewsItem, b: NewsItem): number {
+  if (a.publishedAt !== undefined || b.publishedAt !== undefined) {
+    if (a.publishedAt === undefined) return 1;
+    if (b.publishedAt === undefined) return -1;
+    return b.publishedAt - a.publishedAt || b.id - a.id;
+  }
+  return newsDateTimestamp(b.date) - newsDateTimestamp(a.date) || b.id - a.id;
+}
+
+export function displayNewsDate(value: string, lang: 'en' | 'fa'): string {
+  if (lang === 'en') return value;
+  const date = parseNewsDate(value);
+  return date ? new Intl.DateTimeFormat('fa-IR-u-ca-gregory', { day: 'numeric', month: 'long', year: 'numeric' }).format(date) : value;
 }
 
 export function isNewsDateToday(value: string, today = new Date()): boolean {
@@ -72,7 +89,7 @@ export const newsData: NewsItem[] = [
     content: `Weather-related cosmetic repairs to the main entrance awning at The Lumina Residences will begin on Friday, October 7th.\n\nThe repair work involves repainting and re-sealing the front entry overhang, which sustained minor cosmetic damage during the recent storm season. The structural integrity of the awning has been assessed and is fully sound.\n\nWhat to expect:\n- Scaffolding will be erected along the front facade (left side only)\n- Resident walkway access remains fully unhindered\n- Vehicles in designated spaces 1–8 near the main entrance should temporarily relocate to visitor parking\n- Works are expected to take 3–4 business days to complete\n\nWe appreciate your patience during this maintenance period.`,
   },
   {
-    id: 5, category: 'Golden', title: 'Annual Building Gala — Save the Date',
+    id: 5, category: 'General', title: 'Annual Building Gala — Save the Date',
     date: 'Oct 20, 2026',
     desc: 'You are cordially invited to The Lumina Residences Annual Gala on November 15th. Rooftop terrace. Black tie optional. RSVP by Nov 1st.',
     image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=280&fit=crop&auto=format',
@@ -80,7 +97,7 @@ export const newsData: NewsItem[] = [
     content: `Dear Lumina Residents,\n\nYou are cordially invited to The Lumina Residences Annual Gala — our signature celebration of community, excellence, and the year's highlights.\n\nDate: Saturday, November 15th, 2026\nTime: 7:00 PM – 11:00 PM\nVenue: Rooftop Terrace, Level 42\nDress Code: Black tie optional\n\nThe evening will feature:\n- Welcome cocktails and canapés\n- Live jazz ensemble\n- Award ceremony recognizing outstanding community contributions\n- Three-course dinner\n- Dancing until 11 PM\n\nRSVP is required by November 1st via this app or at the front desk.\n\nComplimentary valet parking will be available for all residents and their guests.\n\nWe look forward to an exceptional evening in your company.`,
   },
   {
-    id: 6, category: 'Golden', title: 'Lobby Renovation — New Look Unveiled',
+    id: 6, category: 'General', title: 'Lobby Renovation — New Look Unveiled',
     date: 'Oct 15, 2026',
     desc: 'Our award-winning renovation of the main lobby is now complete. Come discover the new concierge desk, lounge seating, and art installations.',
     image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=600&h=280&fit=crop&auto=format',
