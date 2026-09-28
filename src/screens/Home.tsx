@@ -2,12 +2,14 @@ import { useRef, type PointerEvent } from 'react';
 import type { Amenity, NavProps } from '../App';
 import { useTheme } from '../theme';
 import { useLang } from '../lang';
-import { newsDateTimestamp } from '../data/newsData';
+import { useProfile } from '../profile';
+import { compareNewsNewestFirst, displayNewsDate } from '../data/newsData';
 import usePublishedNews from '../data/usePublishedNews';
 
 export default function Home({ navigate }: NavProps) {
   const { t, darkMode } = useTheme();
-  const { tr } = useLang();
+  const { tr, lang } = useLang();
+  const profile = useProfile('resident');
   const amenityDrag = useRef<{ pointerId: number; startX: number; scrollLeft: number } | null>(null);
   const didDragAmenities = useRef(false);
   const endAmenityDrag = (event: PointerEvent<HTMLUListElement>) => {
@@ -20,18 +22,18 @@ export default function Home({ navigate }: NavProps) {
   const s = (style: object) => ({ ...style, transition: 'background 0.3s, border-color 0.3s, color 0.3s' });
   const goldenNews = usePublishedNews()
     .filter(item => item.golden)
-    .sort((a, b) => newsDateTimestamp(b.date) - newsDateTimestamp(a.date) || b.id - a.id);
+    .sort(compareNewsNewestFirst);
 
   return (
     <div style={{ background: t.bg, minHeight: '100%', paddingBottom: 16 }}>
       {/* Header */}
       <div style={{ padding: '16px 24px 20px', background: t.bg }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-          <div>
+          <div style={{ minWidth: 0 }}>
             <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', color: t.primary, textTransform: 'uppercase', marginBottom: 4 }}>{tr('app_name_upper')}</p>
-            <h1 style={{ fontSize: 24, fontWeight: 700, color: t.text, lineHeight: 1.15, marginBottom: 8 }}>{tr('home_hello')}</h1>
+            <h1 style={{ fontSize: 24, fontWeight: 700, color: t.text, lineHeight: 1.15, marginBottom: 8 }}>{tr('home_hello')} <bdi style={{ overflowWrap: 'anywhere' }}>{profile.name}</bdi></h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: t.primary, background: t.primaryPale, padding: '3px 10px', borderRadius: 20 }}>{tr('home_unit')}</span>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: t.primary, background: t.primaryPale, padding: '3px 10px', borderRadius: 20 }}><bdi>{profile.subtitle}</bdi></span>
               <button style={{ fontSize: 12, color: t.primary, fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>{tr('btn_view_details')}</button>
             </div>
           </div>
@@ -163,7 +165,10 @@ export default function Home({ navigate }: NavProps) {
                 <span style={{ fontSize: 10, fontWeight: 700, color: darkMode ? '#F5C76B' : '#855600', letterSpacing: '0.08em' }}>
                   ? {tr('news_cat_golden').toUpperCase()}
                 </span>
-                <span style={{ fontSize: 10, color: t.textMuted }}>? {item.date}</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: t.textMuted }}>
+                  {tr(`news_cat_${item.category.toLowerCase()}` as 'news_cat_water' | 'news_cat_gas' | 'news_cat_energy' | 'news_cat_general')}
+                </span>
+                <span style={{ fontSize: 10, color: t.textMuted }}>? {displayNewsDate(item.date, lang)}</span>
               </span>
               <span style={{ display: 'block', fontSize: 13, fontWeight: 600, color: t.text, lineHeight: 1.4 }}>{item.title}</span>
               <span style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', fontSize: 12, color: t.textMuted, lineHeight: 1.5, marginTop: 6 }}>{item.desc}</span>

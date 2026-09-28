@@ -1,6 +1,15 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useRef, useState, type ReactNode } from 'react';
 
 export type Role = 'resident' | 'manager';
+
+// Display identity for the prototype; never stores passwords or grants access.
+export interface CurrentUser {
+  role: Role;
+  name: string;
+  identifier: string;
+  email?: string;
+  unitLabel?: string;
+}
 
 export interface Amenities {
   pool: boolean;
@@ -49,11 +58,14 @@ export interface Charge {
 
 export interface Announcement {
   id: string;
+  newsId: number;
   category: 'Water' | 'Gas' | 'Energy' | 'General';
   title: string;
   body: string;
   date: string;
   published: boolean;
+  golden: boolean;
+  publishedAt: number;
 }
 
 export interface NewsSubmission {
@@ -63,6 +75,7 @@ export interface NewsSubmission {
   category: 'Water' | 'Gas' | 'Energy' | 'General';
   submittedBy: string;
   submittedAt: string;
+  publishedAt?: number;
   status: 'pending' | 'approved' | 'rejected';
   golden: boolean;
 }
@@ -78,6 +91,12 @@ export interface StaffMember {
 }
 
 interface ManagerCtx {
+  currentUser: CurrentUser | null;
+  accounts: CurrentUser[];
+  signInUser: (user: CurrentUser) => void;
+  switchUser: (user: CurrentUser) => void;
+  clearCurrentUser: () => void;
+  signOutUser: () => void;
   apartment: Apartment | null;
   createApartment: (a: Apartment) => void;
   units: Unit[];
@@ -87,12 +106,12 @@ interface ManagerCtx {
   addCharge: (c: Omit<Charge, 'id'>) => void;
   updateCharge: (id: string, patch: Partial<Charge>) => void;
   announcements: Announcement[];
-  addAnnouncement: (a: Omit<Announcement, 'id'>) => void;
+  addAnnouncement: (a: Omit<Announcement, 'id' | 'newsId' | 'publishedAt'>) => void;
   staff: StaffMember[];
   addStaff: (s: Omit<StaffMember, 'id'>) => void;
   updateStaff: (id: string, patch: Partial<StaffMember>) => void;
   newsSubmissions: NewsSubmission[];
-  addNewsSubmission: (sub: Omit<NewsSubmission, 'id' | 'status' | 'golden'>) => void;
+  addNewsSubmission: (sub: Omit<NewsSubmission, 'id' | 'status' | 'golden' | 'publishedAt'>) => void;
   reviewSubmission: (id: number, status: 'approved' | 'rejected', golden: boolean) => void;
 }
 
@@ -109,13 +128,36 @@ const seedStaff: StaffMember[] = [
 const ManagerContext = createContext<ManagerCtx | null>(null);
 
 export function ManagerProvider({ children }: { children: ReactNode }) {
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+  const [accounts, setAccounts] = useState<CurrentUser[]>([]);
   const [apartment, setApartment] = useState<Apartment | null>(null);
   const [units, setUnits] = useState<Unit[]>([]);
   const [charges, setCharges] = useState<Charge[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const nextAnnouncementId = useRef(1);
+  const lastPublishedAt = useRef(0);
   const [staff, setStaff] = useState<StaffMember[]>(seedStaff);
   const [newsSubmissions, setNewsSubmissions] = useState<NewsSubmission[]>([]);
   const [nextSubId, setNextSubId] = useState(1);
+
+  const sameAccount = (a: CurrentUser, b: CurrentUser) =>
+    a.role === b.role && a.identifier.toLocaleLowerCase() === b.identifier.toLocaleLowerCase();
+
+  const signInUser = (user: CurrentUser) => {
+    setAccounts(prev => [...prev.filter(account => !sameAccount(account, user)), user]);
+    setCurrentUser(user);
+  };
+  const switchUser = (user: CurrentUser) => setCurrentUser(user);
+  const clearCurrentUser = () => setCurrentUser(null);
+  const signOutUser = () => {
+    if (currentUser) setAccounts(prev => prev.filter(account => !sameAccount(account, currentUser)));
+    setCurrentUser(null);
+  };
+
+  const publicationTime = () => {
+    lastPublishedAt.current = Math.max(Date.now(), lastPublishedAt.current + 1);
+    return lastPublishedAt.current;
+  };
 
   const createApartment = (a: Apartment) => setApartment(a);
 
@@ -127,15 +169,20 @@ export function ManagerProvider({ children }: { children: ReactNode }) {
   const updateCharge = (id: string, patch: Partial<Charge>) =>
     setCharges(prev => prev.map(c => (c.id === id ? { ...c, ...patch } : c)));
 
-  const addAnnouncement = (a: Omit<Announcement, 'id'>) =>
-    setAnnouncements(prev => [{ ...a, id: genId() }, ...prev]);
+  const addAnnouncement = (a: Omit<Announcement, 'id' | 'newsId' | 'publishedAt'>) => {
+    const newsId = nextAnnouncementId.current++;
+    const publishedAt = publicationTime();
+    setAnnouncements(prev => [{ ...a, id: genId(), newsId, publishedAt }, ...prev]);
+  };
 
-  const addNewsSubmission = (sub: Omit<NewsSubmission, 'id' | 'status' | 'golden'>) => {
+  const addNewsSubmission = (sub: Omit<NewsSubmission, 'id' | 'status' | 'golden' | 'publishedAt'>) => {
     setNewsSubmissions(prev => [...prev, { ...sub, id: nextSubId, status: 'pending', golden: false }]);
     setNextSubId(n => n + 1);
   };
-  const reviewSubmission = (id: number, status: 'approved' | 'rejected', golden: boolean) =>
-    setNewsSubmissions(prev => prev.map(s => s.id === id ? { ...s, status, golden } : s));
+  const reviewSubmission = (id: number, status: 'approved' | 'rejected', golden: boolean) => {
+    const publishedAt = status === 'approved' ? publicationTime() : undefined;
+    setNewsSubmissions(prev => prev.map(s => s.id === id ? { ...s, status, golden, publishedAt } : s));
+  };
 
   const addStaff = (s: Omit<StaffMember, 'id'>) => setStaff(prev => [...prev, { ...s, id: genId() }]);
   const updateStaff = (id: string, patch: Partial<StaffMember>) =>
@@ -143,6 +190,7 @@ export function ManagerProvider({ children }: { children: ReactNode }) {
 
   return (
     <ManagerContext.Provider value={{
+      currentUser, accounts, signInUser, switchUser, clearCurrentUser, signOutUser,
       apartment, createApartment,
       units, addUnit, updateUnit,
       charges, addCharge, updateCharge,

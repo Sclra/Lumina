@@ -61,6 +61,7 @@ export interface NavParams {
 export interface NavProps {
   navigate: (screen: Screen, params?: NavParams) => void;
   goBack: () => void;
+  resetTo: (screen: Screen, params?: NavParams) => void;
   params: NavParams;
 }
 
@@ -83,6 +84,14 @@ function PhoneShell() {
     document.querySelector('.app-scroll')?.scrollTo(0, 0);
   };
 
+  const resetTo = (s: Screen, p?: NavParams) => {
+    setHistoryScreens([]);
+    setHistoryParams([]);
+    setScreen(s);
+    setParams(p ?? {});
+    document.querySelector('.app-scroll')?.scrollTo(0, 0);
+  };
+
   const goBack = () => {
     const prev = historyScreens[historyScreens.length - 1];
     const prevP = historyParams[historyParams.length - 1];
@@ -95,7 +104,7 @@ function PhoneShell() {
 
   const showBottomNav = TAB_SCREENS.includes(screen);
   const showManagerNav = MANAGER_TAB_SCREENS.includes(screen);
-  const navProps: NavProps = { navigate, goBack, params };
+  const navProps: NavProps = { navigate, goBack, resetTo, params };
 
   return (
     <div
