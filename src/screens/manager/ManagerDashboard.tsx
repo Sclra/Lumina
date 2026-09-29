@@ -2,12 +2,13 @@ import type { NavProps } from '../../App';
 import { useTheme } from '../../theme';
 import { useManager } from '../../managerStore';
 import { useLang } from '../../lang';
+import { formatMoney } from '../../formatMoney';
 import { Card } from './mui';
 
 export default function ManagerDashboard({ navigate, resetTo }: NavProps) {
   const { t } = useTheme();
-  const { tr } = useLang();
-  const { apartment, units, charges, announcements, signOutUser } = useManager();
+  const { tr, lang } = useLang();
+  const { apartment, units, charges, announcements } = useManager();
 
   if (!apartment) {
     return (
@@ -38,7 +39,7 @@ export default function ManagerDashboard({ navigate, resetTo }: NavProps) {
           <h1 style={{ fontSize: 24, fontWeight: 700, color: t.text, lineHeight: 1.15, marginBottom: 4 }}>{apartment.name}</h1>
           <p style={{ fontSize: 12, color: t.textFaint }}>{apartment.address}</p>
         </div>
-        <button onClick={() => { signOutUser(); resetTo('signin'); }} title={tr('settings_logout')} style={{ background: t.card, border: `1.5px solid ${t.cardBorder}`, borderRadius: 12, padding: 10, cursor: 'pointer', flexShrink: 0 }}>
+        <button onClick={() => navigate('m-settings', { isManager: true, openLogout: true })} title={tr('settings_logout')} style={{ background: t.card, border: `1.5px solid ${t.cardBorder}`, borderRadius: 12, padding: 10, cursor: 'pointer', flexShrink: 0 }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.text} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
         </button>
       </div>
@@ -47,7 +48,7 @@ export default function ManagerDashboard({ navigate, resetTo }: NavProps) {
       <div style={{ padding: '0 24px 14px' }}>
         <div style={{ background: t.primary, borderRadius: 18, padding: '18px 20px' }}>
           <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)', marginBottom: 6 }}>{tr('m_outstanding_label')}</p>
-          <p style={{ fontSize: 30, fontWeight: 700, color: '#fff', lineHeight: 1 }}>${outstanding.toFixed(2)}</p>
+          <p style={{ fontSize: 30, fontWeight: 700, color: '#fff', lineHeight: 1 }}>{formatMoney(outstanding.toFixed(2), lang)}</p>
           <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', marginTop: 6 }}>{charges.filter(c => c.status !== 'paid').length} {tr('m_open_charges')} • {occupied} {tr('m_paying_residents')}</p>
         </div>
       </div>

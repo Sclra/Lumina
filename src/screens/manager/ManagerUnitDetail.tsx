@@ -4,14 +4,16 @@ import { useTheme } from '../../theme';
 import { useManager, genPassword } from '../../managerStore';
 import { ManagerHeader, Card, StatusPill, PrimaryButton } from './mui';
 import { useLang } from '../../lang';
+import { formatMoney } from '../../formatMoney';
 
-export default function ManagerUnitDetail({ params, goBack }: NavProps) {
+export default function ManagerUnitDetail({ params, goBack, navigate }: NavProps) {
   const { t } = useTheme();
-  const { tr } = useLang();
-  const { units, updateUnit } = useManager();
+  const { tr, lang } = useLang();
+  const { units, updateUnit, deleteUnit } = useManager();
   const unit = units.find(u => u.id === params.unitId);
   const [justSent, setJustSent] = useState(false);
   const [showPw, setShowPw] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   if (!unit) {
     return (
@@ -29,20 +31,32 @@ export default function ManagerUnitDetail({ params, goBack }: NavProps) {
     setShowPw(true);
   };
 
+  const statusLabel = { occupied: tr('m_units_occupied'), invited: tr('m_units_invited'), vacant: tr('m_units_vacant') };
+
   const rows = [
     { k: tr('m_unit_row_owner'), v: unit.owner || tr('m_word_unassigned') },
     { k: tr('m_unit_row_email'), v: unit.email || '—' },
     { k: tr('m_unit_row_floor'), v: String(unit.floor) },
-    { k: tr('m_unit_row_bedrooms'), v: `${unit.bedrooms} BR` },
-    { k: tr('m_unit_row_balance'), v: unit.balance > 0 ? `$${unit.balance.toFixed(2)}` : tr('m_word_settled') },
+    { k: tr('m_unit_row_balance'), v: unit.balance > 0 ? formatMoney(unit.balance.toFixed(2), lang) : tr('m_word_settled') },
   ];
 
   return (
     <div style={{ background: t.bg, minHeight: '100%', paddingBottom: 32, transition: 'background 0.3s' }}>
-      <ManagerHeader eyebrow={`Unit ${unit.label}`} title={unit.owner || tr('m_word_vacant_unit')} onBack={goBack}
-        action={<StatusPill label={unit.status} tone={unit.status === 'occupied' ? 'paid' : unit.status === 'invited' ? 'primary' : 'future'} />} />
+      <ManagerHeader eyebrow={`${tr('m_unit_label_field')} ${unit.label}`} title={unit.owner || tr('m_word_vacant_unit')} onBack={goBack}
+        action={<StatusPill label={statusLabel[unit.status]} tone={unit.status === 'occupied' ? 'paid' : unit.status === 'invited' ? 'primary' : 'future'} />} />
 
       <div style={{ padding: '0 24px' }}>
+        <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
+          <button type="button" onClick={() => navigate('m-unit-new', { unitId: unit.id })} style={{ flex: 1, padding: '11px', borderRadius: 12, border: `1px solid ${t.primary}`, color: t.primary, background: t.card, fontWeight: 600, cursor: 'pointer' }}>{tr('m_unit_edit_btn')}</button>
+          <button type="button" onClick={() => setConfirmDelete(true)} style={{ flex: 1, padding: '11px', borderRadius: 12, border: `1px solid ${t.dueText}`, color: t.dueText, background: t.card, fontWeight: 600, cursor: 'pointer' }}>{tr('m_unit_delete_btn')}</button>
+        </div>
+        {confirmDelete && <div role="alertdialog" aria-label={tr('m_unit_delete_btn')} style={{ background: t.dueBg, border: `1px solid ${t.dueText}`, borderRadius: 14, padding: 16, marginBottom: 14 }}>
+          <p style={{ fontSize: 13, color: t.dueText, lineHeight: 1.5, marginBottom: 12 }}>{tr('m_unit_delete_confirm')}</p>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button type="button" onClick={() => setConfirmDelete(false)} style={{ flex: 1, padding: 10, borderRadius: 10, border: `1px solid ${t.cardBorder}`, background: t.card, color: t.text, cursor: 'pointer' }}>{tr('btn_cancel')}</button>
+            <button type="button" onClick={() => { deleteUnit(unit.id); goBack(); }} style={{ flex: 1, padding: 10, borderRadius: 10, border: 'none', background: t.dueText, color: '#fff', cursor: 'pointer' }}>{tr('m_unit_delete_btn')}</button>
+          </div>
+        </div>}
         <Card style={{ marginBottom: 12, padding: 0 }}>
           {rows.map((r, i) => (
             <div key={r.k} style={{ display: 'flex', justifyContent: 'space-between', padding: '13px 16px', borderTop: i ? `1px solid ${t.borderLight}` : 'none' }}>

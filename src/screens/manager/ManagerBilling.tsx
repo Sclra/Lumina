@@ -4,6 +4,8 @@ import { useTheme } from '../../theme';
 import { useManager, type ChargeType, type ChargeStatus } from '../../managerStore';
 import { ManagerHeader, StatusPill } from './mui';
 import { useLang } from '../../lang';
+import { formatMoney } from '../../formatMoney';
+import { displayStoredDate } from '../../formatDate';
 
 const typeMeta: Record<ChargeType, { bg: string; darkBg: string; stroke: string; icon: ReactElement }> = {
   apartment: { bg: '#E8F0EE', darkBg: '#0E2018', stroke: '#1A4A38', icon: <><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" /><path d="M9 21V13h6v8" /></> },
@@ -16,7 +18,7 @@ const statusTone: Record<ChargeStatus, 'future' | 'primary' | 'paid'> = { pendin
 
 export default function ManagerBilling({ navigate }: NavProps) {
   const { t, darkMode } = useTheme();
-  const { tr } = useLang();
+  const { tr, lang } = useLang();
   const { charges } = useManager();
 
   const typeLabels: Record<ChargeType, string> = {
@@ -44,7 +46,7 @@ export default function ManagerBilling({ navigate }: NavProps) {
       <div style={{ padding: '0 24px 14px' }}>
         <div style={{ background: t.primary, borderRadius: 16, padding: '15px 18px' }}>
           <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)', marginBottom: 5 }}>{tr('m_billing_outstanding')}</p>
-          <p style={{ fontSize: 26, fontWeight: 700, color: '#fff', lineHeight: 1 }}>${outstanding.toFixed(2)}</p>
+          <p style={{ fontSize: 26, fontWeight: 700, color: '#fff', lineHeight: 1 }}>{formatMoney(outstanding.toFixed(2), lang)}</p>
         </div>
       </div>
 
@@ -76,9 +78,9 @@ export default function ManagerBilling({ navigate }: NavProps) {
               <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', paddingTop: 10, borderTop: `1px solid ${t.borderLight}` }}>
                 <div>
                   <p style={{ fontSize: 9, fontWeight: 700, color: t.textFaint, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 3 }}>{tr('word_due_cap')}</p>
-                  <p style={{ fontSize: 12.5, color: t.textMuted, fontWeight: 500 }}>{c.due}</p>
+                  <p style={{ fontSize: 12.5, color: t.textMuted, fontWeight: 500 }}>{displayStoredDate(c.due, lang)}</p>
                 </div>
-                <p style={{ fontSize: 20, fontWeight: 700, color: t.text }}>${c.amount.toFixed(2)}</p>
+                <p style={{ fontSize: 20, fontWeight: 700, color: t.text }}>{formatMoney(c.amount.toFixed(2), lang)}</p>
               </div>
               {c.link && (
                 <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 6, background: t.mutedSurface, borderRadius: 10, padding: '8px 12px' }}>

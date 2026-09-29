@@ -57,6 +57,7 @@ export interface NavParams {
   newsId?: number;
   unitId?: string;
   isManager?: boolean;
+  openLogout?: boolean;
 }
 
 export interface NavProps {

@@ -3,6 +3,7 @@ import { useTheme } from '../../theme';
 import { useManager, type UnitStatus } from '../../managerStore';
 import { ManagerHeader, StatusPill } from './mui';
 import { useLang } from '../../lang';
+import { formatMoney } from '../../formatMoney';
 
 const statusTone: Record<UnitStatus, 'paid' | 'primary' | 'future'> = {
   occupied: 'paid', invited: 'primary', vacant: 'future',
@@ -10,7 +11,7 @@ const statusTone: Record<UnitStatus, 'paid' | 'primary' | 'future'> = {
 
 export default function ManagerUnits({ navigate }: NavProps) {
   const { t } = useTheme();
-  const { tr } = useLang();
+  const { tr, lang } = useLang();
   const { units, apartment } = useManager();
 
   const statusLabel: Record<UnitStatus, string> = {
@@ -56,7 +57,7 @@ export default function ManagerUnits({ navigate }: NavProps) {
                 </div>
                 <div>
                   <p style={{ fontSize: 14, fontWeight: 600, color: t.text, marginBottom: 2 }}>{u.owner || tr('m_word_unassigned')}</p>
-                  <p style={{ fontSize: 11.5, color: t.textFaint }}>Floor {u.floor} • {u.bedrooms} BR</p>
+                  <p style={{ fontSize: 11.5, color: t.textFaint }}>{tr('m_unit_row_floor')} {u.floor}</p>
                 </div>
               </div>
               <StatusPill label={statusLabel[u.status]} tone={statusTone[u.status]} />
@@ -68,7 +69,7 @@ export default function ManagerUnits({ navigate }: NavProps) {
                   : <><span style={{ width: 7, height: 7, borderRadius: '50%', background: t.futureDot }} /> {tr('m_units_not_invited')}</>}
               </span>
               <span style={{ fontSize: 13, fontWeight: 600, color: u.balance > 0 ? t.dueText : t.textMuted }}>
-                {u.balance > 0 ? `$${u.balance.toFixed(2)} ${tr('word_due_cap')}` : tr('m_word_settled')}
+                {u.balance > 0 ? `${formatMoney(u.balance.toFixed(2), lang)} ${tr('word_due_cap')}` : tr('m_word_settled')}
               </span>
             </div>
           </div>

@@ -4,7 +4,7 @@ import { useTheme } from '../theme';
 import { useManager, type Role } from '../managerStore';
 import { useLang } from '../lang';
 
-function BuildingIllustration({ dark }: { dark: boolean }) {
+function BuildingIllustration({ dark, accent }: { dark: boolean; accent: string }) {
   const bld1 = dark ? '#1E2B26' : '#C8BFB0';
   const bld2 = dark ? '#172018' : '#BCB3A4';
   const bld3 = dark ? '#1C2820' : '#C4BAA8';
@@ -61,8 +61,8 @@ function BuildingIllustration({ dark }: { dark: boolean }) {
       <rect x="91" y="160" width="6" height="20" fill={dark ? '#122010' : '#7A9470'} opacity="0.5" />
       <ellipse cx="218" cy="152" rx="17" ry="19" fill={treeFill} opacity={treeOp - 0.05} />
       <rect x="215" y="162" width="6" height="18" fill={dark ? '#122010' : '#7A9470'} opacity="0.5" />
-      <rect x="128" y="4" width="64" height="14" rx="3" fill={dark ? '#2E8060' : '#1A4A38'} opacity="0.15" />
-      <text x="160" y="14" textAnchor="middle" fontSize="7" fill={dark ? '#2E8060' : '#1A4A38'} fontWeight="600" letterSpacing="2" opacity="0.9">LUMINA</text>
+      <rect x="128" y="4" width="64" height="14" rx="3" fill={accent} opacity="0.15" />
+      <text x="160" y="14" textAnchor="middle" fontSize="7" fill={accent} fontWeight="600" letterSpacing="2" opacity="0.9">LUMINA</text>
     </svg>
   );
 }
@@ -113,7 +113,7 @@ export default function SignIn({ navigate, resetTo }: NavProps) {
   return (
     <div style={{ background: t.bg, minHeight: '100%', display: 'flex', flexDirection: 'column', transition: 'background 0.3s' }}>
       <div style={{ background: darkMode ? '#0D1210' : '#EDE9E0', overflow: 'hidden' }}>
-        <BuildingIllustration dark={darkMode} />
+        <BuildingIllustration dark={darkMode} accent={t.primary} />
       </div>
 
       <div style={{ padding: '28px 28px 32px', flex: 1 }}>

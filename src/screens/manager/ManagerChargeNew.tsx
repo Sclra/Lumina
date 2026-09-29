@@ -7,7 +7,7 @@ import { useLang } from '../../lang';
 
 export default function ManagerChargeNew({ goBack }: NavProps) {
   const { t } = useTheme();
-  const { tr } = useLang();
+  const { tr, lang } = useLang();
   const { addCharge, updateUnit, units } = useManager();
 
   const types = [
@@ -78,7 +78,7 @@ export default function ManagerChargeNew({ goBack }: NavProps) {
           </div>
           <div style={{ flex: 1 }}>
             <Field label={tr('m_charge_due_date')}>
-              <input value={due} onChange={e => setDue(e.target.value)} style={inputStyle(t)} placeholder="Oct 15, 2026" />
+              <input value={due} onChange={e => setDue(e.target.value)} style={inputStyle(t)} placeholder={lang === 'fa' ? '۱۵ مهر ۱۴۰۵' : 'Oct 15, 2026'} />
             </Field>
           </div>
         </div>

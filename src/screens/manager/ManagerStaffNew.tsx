@@ -4,6 +4,7 @@ import { useTheme } from '../../theme';
 import { useManager, type StaffRole } from '../../managerStore';
 import { ManagerHeader, Field, inputStyle, PrimaryButton } from './mui';
 import { useLang } from '../../lang';
+import { staffRoleLabelKeys } from './staffRoleLabels';
 
 export default function ManagerStaffNew({ goBack }: NavProps) {
   const { t } = useTheme();
@@ -35,10 +36,10 @@ export default function ManagerStaffNew({ goBack }: NavProps) {
 
       <div style={{ padding: '0 24px' }}>
         <Field label={tr('m_staff_name_field')}>
-          <input value={name} onChange={e => setName(e.target.value)} style={inputStyle(t)} placeholder="e.g. Priya Nair" />
+          <input value={name} onChange={e => setName(e.target.value)} style={inputStyle(t)} />
         </Field>
         <Field label={tr('m_staff_email_field')}>
-          <input value={email} onChange={e => setEmail(e.target.value)} type="email" style={inputStyle(t)} placeholder="name@lumina.co" />
+          <input value={email} onChange={e => setEmail(e.target.value)} type="email" style={inputStyle(t)} />
         </Field>
 
         <label style={{ fontSize: 11, fontWeight: 600, color: t.textFaint, letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: 10 }}>{tr('m_staff_role_perms')}</label>
@@ -47,7 +48,7 @@ export default function ManagerStaffNew({ goBack }: NavProps) {
             const on = role === r.id;
             return (
               <button key={r.id} onClick={() => setRole(r.id)} style={{
-                width: '100%', display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left',
+                width: '100%', display: 'flex', alignItems: 'center', gap: 12, textAlign: 'start',
                 background: on ? t.primaryPale : t.card, border: `1.5px solid ${on ? t.primary : t.cardBorder}`,
                 borderRadius: 12, padding: '13px 14px', cursor: 'pointer', marginBottom: 8, transition: 'all 0.15s',
               }}>
@@ -55,7 +56,7 @@ export default function ManagerStaffNew({ goBack }: NavProps) {
                   {on && <div style={{ width: 9, height: 9, borderRadius: '50%', background: t.primary }} />}
                 </div>
                 <div>
-                  <p style={{ fontSize: 13.5, fontWeight: 600, color: on ? t.primary : t.text, marginBottom: 1 }}>{r.id}</p>
+                  <p style={{ fontSize: 13.5, fontWeight: 600, color: on ? t.primary : t.text, marginBottom: 1 }}>{tr(staffRoleLabelKeys[r.id])}</p>
                   <p style={{ fontSize: 11.5, color: t.textFaint }}>{r.desc}</p>
                 </div>
               </button>

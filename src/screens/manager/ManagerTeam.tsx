@@ -3,6 +3,7 @@ import { useTheme } from '../../theme';
 import { useManager, type StaffRole } from '../../managerStore';
 import { ManagerHeader, Toggle } from './mui';
 import { useLang } from '../../lang';
+import { staffRoleLabelKeys } from './staffRoleLabels';
 
 const roleColor: Record<StaffRole, string> = {
   Owner: '#8A5E3A', 'Property Manager': '#1A4A38', 'Front Desk': '#2D7A9E', Maintenance: '#7A5EA0', Accountant: '#5E7A3A',
@@ -43,7 +44,7 @@ export default function ManagerTeam({ navigate }: NavProps) {
                   <p style={{ fontSize: 14, fontWeight: 600, color: t.text, marginBottom: 2, opacity: m.active ? 1 : 0.5 }}>{m.name}</p>
                   <p style={{ fontSize: 11.5, color: t.textFaint, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.email}</p>
                 </div>
-                <span style={{ fontSize: 10, fontWeight: 700, color: rc, background: rc + (darkMode ? '22' : '18'), padding: '3px 10px', borderRadius: 20, letterSpacing: '0.03em', flexShrink: 0 }}>{m.role}</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: rc, background: rc + (darkMode ? '22' : '18'), padding: '3px 10px', borderRadius: 20, letterSpacing: '0.03em', flexShrink: 0 }}>{tr(staffRoleLabelKeys[m.role])}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, marginTop: 12, borderTop: `1px solid ${t.borderLight}` }}>
                 <span style={{ fontSize: 12.5, color: t.textMuted }}>{m.active ? tr('m_team_active_access') : tr('m_team_suspended')}</span>
