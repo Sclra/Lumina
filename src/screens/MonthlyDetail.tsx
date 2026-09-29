@@ -1,33 +1,24 @@
 import { useState } from 'react';
-import type { NavProps, PaymentType } from '../App';
+import type { NavProps } from '../App';
 import { useTheme } from '../theme';
 import { useLang } from '../lang';
-
-const paymentInfoBase: Record<PaymentType, { nameKey: string; breakdownKeys: string[]; breakdownAmounts: number[]; dueDay: number; paidDay: number | null }> = {
-  apartment: { nameKey: 'payments_apartment', breakdownKeys: ['pb_apartment_base','pb_apartment_maintenance','pb_apartment_parking','pb_apartment_insurance'], breakdownAmounts: [120,35,20,10], dueDay: 15, paidDay: 12 },
-  water:     { nameKey: 'payments_water',     breakdownKeys: ['pb_water_base','pb_water_usage','pb_water_infra','pb_water_env'], breakdownAmounts: [22,11.5,5,4], dueDay: 15, paidDay: null },
-  energy:    { nameKey: 'payments_energy',    breakdownKeys: ['pb_energy_base','pb_energy_usage','pb_energy_network','pb_energy_carbon'], breakdownAmounts: [85,22.9,8,3], dueDay: 15, paidDay: null },
-};
+import { getPayment } from '../data/payments';
+import { currentSolarDate, formatSolarDate, formatSolarMonth } from '../data/solarHijri';
 
 export default function MonthlyDetail({ goBack, params }: NavProps) {
   const { t } = useTheme();
-  const { tr, isRTL } = useLang();
+  const { tr, isRTL, lang } = useLang();
   const [downloaded, setDownloaded] = useState(false);
   const type = params.paymentType ?? 'apartment';
-  const month = params.month ?? 0;
-
-  const MONTHS = [tr('month_full_jan'),tr('month_full_feb'),tr('month_full_mar'),tr('month_full_apr'),tr('month_full_may'),tr('month_full_jun'),tr('month_full_jul'),tr('month_full_aug'),tr('month_full_sep'),tr('month_full_oct'),tr('month_full_nov'),tr('month_full_dec')];
-
-  const infoBase = paymentInfoBase[type];
+  const today = currentSolarDate();
+  const month = params.month ?? today.month;
+  const year = params.year ?? today.year;
+  const payment = getPayment(type, year, month, today);
   const info = {
-    name: tr(infoBase.nameKey as Parameters<typeof tr>[0]),
-    breakdowns: infoBase.breakdownKeys.map((k, i) => ({ label: tr(k as Parameters<typeof tr>[0]), amount: infoBase.breakdownAmounts[i] })),
-    dueDay: infoBase.dueDay,
-    paidDay: infoBase.paidDay,
+    name: tr(payment.nameKey),
+    breakdowns: payment.breakdownKeys.map((key, i) => ({ label: tr(key), amount: payment.amounts[i] })),
   };
-  const total = info.breakdowns.reduce((s, b) => s + b.amount, 0);
-  const isPaid = info.paidDay !== null && month < 8;
-  const status: 'PAID' | 'DUE' | 'FUTURE' = isPaid ? 'PAID' : month < 8 ? 'DUE' : 'FUTURE';
+  const { total, status } = payment;
 
   const statusBg = status === 'PAID' ? t.paidBg : status === 'DUE' ? t.dueBg : t.futureBg;
   const statusTx = status === 'PAID' ? t.paidText : status === 'DUE' ? t.dueText : t.futureText;
@@ -41,7 +32,7 @@ export default function MonthlyDetail({ goBack, params }: NavProps) {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.primary} strokeWidth="2" strokeLinecap="round" style={{ transform: isRTL ? 'scaleX(-1)' : undefined }}><path d="M15 18l-6-6 6-6" /></svg>
           <span style={{ fontSize: 12, color: t.textMuted }}>{tr('app_name_upper')}</span>
         </button>
-        <h1 style={{ fontSize: 24, fontWeight: 700, color: t.text, marginBottom: 2 }}>{MONTHS[month]} 2026</h1>
+        <h1 style={{ fontSize: 24, fontWeight: 700, color: t.text, marginBottom: 2 }}>{formatSolarMonth(year, month, lang)}</h1>
         <p style={{ fontSize: 13, color: t.textFaint, marginBottom: 18 }}>{info.name}</p>
       </div>
 
@@ -63,12 +54,12 @@ export default function MonthlyDetail({ goBack, params }: NavProps) {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, paddingTop: 14, borderTop: `1px solid ${t.borderLight}` }}>
             <div>
               <p style={{ fontSize: 9, fontWeight: 700, color: t.textFaint, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 3 }}>{tr('payments_due_date')}</p>
-              <p style={{ fontSize: 13, fontWeight: 600, color: t.text }}>Jan {info.dueDay}, 2026</p>
+              <p style={{ fontSize: 13, fontWeight: 600, color: t.text }}>{formatSolarDate(payment.dueDate, lang)}</p>
             </div>
             <div>
               <p style={{ fontSize: 9, fontWeight: 700, color: t.textFaint, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 3 }}>{tr('monthly_charged_on')}</p>
               <p style={{ fontSize: 13, fontWeight: 600, color: status === 'PAID' ? t.paidText : t.textFaint }}>
-                {status === 'PAID' ? `Jan ${info.paidDay}, 2026` : '—'}
+                {payment.paidDate ? formatSolarDate(payment.paidDate, lang) : '—'}
               </p>
             </div>
           </div>
@@ -94,7 +85,7 @@ export default function MonthlyDetail({ goBack, params }: NavProps) {
 
       {/* Statement No */}
       <div style={{ padding: '0 24px 4px' }}>
-        <p style={{ fontSize: 11, color: t.textFaint }}>Statement No. <span style={{ color: t.textMuted, fontWeight: 500 }}>#LUM-2026-{String(month + 1).padStart(2, '0')}</span></p>
+        <p style={{ fontSize: 11, color: t.textFaint }}>Statement No. <span style={{ color: t.textMuted, fontWeight: 500 }}>#LUM-{year}-{String(month).padStart(2, '0')}</span></p>
       </div>
 
       {/* Payment Method */}

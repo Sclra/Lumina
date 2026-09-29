@@ -5,13 +5,12 @@ import { useLang } from '../../lang';
 import { useManager, type Amenities } from '../../managerStore';
 import { Field, inputStyle, PrimaryButton } from './mui';
 
-const amenityMeta: { key: keyof Amenities; labelKey: 'm_setup_amenity_pool' | 'm_setup_amenity_rooftop' | 'm_setup_amenity_gym' | 'm_setup_amenity_parking' | 'm_setup_amenity_lounge' | 'm_setup_amenity_laundry' }[] = [
-  { key: 'pool', labelKey: 'm_setup_amenity_pool' },
-  { key: 'rooftop', labelKey: 'm_setup_amenity_rooftop' },
+const amenityMeta: { key: keyof Amenities; labelKey: 'm_setup_amenity_pool' | 'm_setup_amenity_rooftop' | 'm_setup_amenity_gym' | 'm_setup_amenity_parking' | 'm_setup_amenity_hall' }[] = [
   { key: 'gym', labelKey: 'm_setup_amenity_gym' },
-  { key: 'parking', labelKey: 'm_setup_amenity_parking' },
-  { key: 'lounge', labelKey: 'm_setup_amenity_lounge' },
-  { key: 'laundry', labelKey: 'm_setup_amenity_laundry' },
+  { key: 'rooftop', labelKey: 'm_setup_amenity_rooftop' },
+  { key: 'pool', labelKey: 'm_setup_amenity_pool' },
+  { key: 'guest-parking', labelKey: 'm_setup_amenity_parking' },
+  { key: 'community-hall', labelKey: 'm_setup_amenity_hall' },
 ];
 
 export default function ManagerSetup({ navigate, resetTo }: NavProps) {
@@ -24,7 +23,7 @@ export default function ManagerSetup({ navigate, resetTo }: NavProps) {
   const [floors, setFloors] = useState('12');
   const [unitsPerFloor, setUnitsPerFloor] = useState('4');
   const [amenities, setAmenities] = useState<Amenities>({
-    pool: true, rooftop: true, gym: true, parking: true, lounge: false, laundry: false,
+    gym: false, rooftop: false, pool: false, 'guest-parking': false, 'community-hall': false,
   });
 
   const canSubmit = name.trim() && address.trim() && Number(floors) > 0;
@@ -78,7 +77,7 @@ export default function ManagerSetup({ navigate, resetTo }: NavProps) {
           {amenityMeta.map(({ key, labelKey }) => {
             const on = amenities[key];
             return (
-              <button key={key} onClick={() => setAmenities(a => ({ ...a, [key]: !a[key] }))}
+              <button key={key} type="button" aria-pressed={on} onClick={() => setAmenities(a => ({ ...a, [key]: !a[key] }))}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 8, textAlign: 'start',
                   background: on ? t.primaryPale : t.card, border: `1.5px solid ${on ? t.primary : t.cardBorder}`,

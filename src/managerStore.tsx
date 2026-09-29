@@ -15,9 +15,8 @@ export interface Amenities {
   pool: boolean;
   rooftop: boolean;
   gym: boolean;
-  parking: boolean;
-  lounge: boolean;
-  laundry: boolean;
+  'guest-parking': boolean;
+  'community-hall': boolean;
 }
 
 export interface Apartment {
