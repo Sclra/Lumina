@@ -2,12 +2,13 @@ import type { NavProps } from '../App';
 import { useTheme } from '../theme';
 import { useLang } from '../lang';
 import usePublishedNews from '../data/usePublishedNews';
+import { displayNewsDate } from '../data/newsData';
 
 const catColor: Record<string, string> = { Water: '#2D7A9E', Gas: '#8A5E3A', Energy: '#7A5EA0', General: '#5E7A3A' };
 
 export default function NewsDetail({ goBack, params }: NavProps) {
-  const { t } = useTheme();
-  const { tr, isRTL } = useLang();
+  const { t, darkMode } = useTheme();
+  const { tr, isRTL, lang } = useLang();
   const newsData = usePublishedNews();
   const id = params.newsId ?? 1;
   const item = newsData.find(n => n.id === id) ?? newsData[0];
@@ -17,11 +18,10 @@ export default function NewsDetail({ goBack, params }: NavProps) {
     Gas: tr('news_cat_gas'),
     Energy: tr('news_cat_energy'),
     General: tr('news_cat_general'),
-    Golden: tr('news_cat_golden'),
   };
 
-  const isGolden = (item as { golden?: boolean }).golden === true;
-  const color = isGolden ? '#B8860B' : (catColor[item.category] || t.textMuted);
+  const isGolden = item.golden;
+  const color = catColor[item.category] || t.textMuted;
   const categoryLabel = catLabels[item.category] ?? item.category;
 
   return (
@@ -36,7 +36,10 @@ export default function NewsDetail({ goBack, params }: NavProps) {
           <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color, textTransform: 'uppercase', background: `${color}18`, padding: '3px 10px', borderRadius: 12, border: `1px solid ${color}30` }}>
             {categoryLabel}
           </span>
-          <span style={{ fontSize: 12, color: t.textFaint }}>{item.date}</span>
+          {isGolden && (
+            <span style={{ fontSize: 10, fontWeight: 700, color: '#B8860B', background: darkMode ? '#1A1400' : '#FDF6E3', padding: '3px 10px', borderRadius: 12, border: '1px solid #DAA52030' }}>★ {tr('news_cat_golden')}</span>
+          )}
+          <span style={{ fontSize: 12, color: t.textFaint }}>{displayNewsDate(item.date, lang)}</span>
         </div>
 
         <h1 style={{ fontSize: 22, fontWeight: 700, color: t.text, lineHeight: 1.3, marginBottom: 16 }}>{item.title}</h1>

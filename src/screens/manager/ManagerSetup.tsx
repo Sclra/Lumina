@@ -14,10 +14,10 @@ const amenityMeta: { key: keyof Amenities; labelKey: 'm_setup_amenity_pool' | 'm
   { key: 'laundry', labelKey: 'm_setup_amenity_laundry' },
 ];
 
-export default function ManagerSetup({ navigate }: NavProps) {
+export default function ManagerSetup({ navigate, resetTo }: NavProps) {
   const { t } = useTheme();
   const { tr, lang, dir } = useLang();
-  const { createApartment } = useManager();
+  const { createApartment, signOutUser } = useManager();
 
   const [name, setName] = useState(() => lang === 'fa' ? 'مجتمع لومینا' : 'The Lumina Residences');
   const [address, setAddress] = useState('');
@@ -94,7 +94,7 @@ export default function ManagerSetup({ navigate }: NavProps) {
         </div>
 
         <PrimaryButton onClick={submit} disabled={!canSubmit}>{tr('m_setup_create_continue')}</PrimaryButton>
-        <button onClick={() => navigate('signin')} style={{ width: '100%', marginTop: 12, background: 'none', border: 'none', color: t.textFaint, fontSize: 13, cursor: 'pointer' }}>{tr('btn_cancel')}</button>
+        <button onClick={() => { signOutUser(); resetTo('signin'); }} style={{ width: '100%', marginTop: 12, background: 'none', border: 'none', color: t.textFaint, fontSize: 13, cursor: 'pointer' }}>{tr('btn_cancel')}</button>
       </div>
     </div>
   );

@@ -1,16 +1,18 @@
 import type { NavProps } from '../App';
 import { useTheme } from '../theme';
 import { useLang } from '../lang';
+import { useManager, type CurrentUser } from '../managerStore';
 
-export default function Accounts({ navigate, goBack, params }: NavProps) {
+export default function Accounts({ resetTo, goBack }: NavProps) {
   const { t } = useTheme();
-  const { tr } = useLang();
-  const isManager = !!params.isManager;
+  const { tr, isRTL } = useLang();
+  const { accounts, currentUser, switchUser, clearCurrentUser, apartment } = useManager();
 
-  const accounts = [
-    { initials: 'SJ', name: tr('settings_profile_resident'), detail: 'sarah.jenkins@email.com', roleKey: 'accounts_resident' as const },
-    { initials: 'AM', name: tr('settings_profile_manager'), detail: 'a.morgan@luminamgmt.com', roleKey: 'accounts_manager' as const },
-  ];
+  const selectAccount = (account: CurrentUser) => {
+    if (currentUser?.role === account.role && currentUser.identifier.toLocaleLowerCase() === account.identifier.toLocaleLowerCase()) return;
+    switchUser(account);
+    resetTo(account.role === 'manager' ? (apartment ? 'm-dashboard' : 'm-setup') : 'home');
+  };
 
   const rolePill = (roleKey: 'accounts_resident' | 'accounts_manager') => {
     const isRes = roleKey === 'accounts_resident';
@@ -36,27 +38,29 @@ export default function Accounts({ navigate, goBack, params }: NavProps) {
         <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', color: t.textFaint, textTransform: 'uppercase', marginBottom: 8 }}>{tr('accounts_signed_in')}</p>
         <div style={{ background: t.card, border: `1.5px solid ${t.cardBorder}`, borderRadius: 18, overflow: 'hidden', transition: 'background 0.3s' }}>
           {accounts.map((acc, i) => {
-            const isCurrent = isManager ? acc.roleKey === 'accounts_manager' : acc.roleKey === 'accounts_resident';
+            const isCurrent = currentUser?.role === acc.role && currentUser.identifier.toLocaleLowerCase() === acc.identifier.toLocaleLowerCase();
+            const roleKey = acc.role === 'manager' ? 'accounts_manager' : 'accounts_resident';
+            const initials = acc.name.trim().split(/\s+/).slice(0, 2).map(part => Array.from(part)[0]).join('').toUpperCase();
             return (
-              <div key={acc.name}
-                style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 18px', borderBottom: i < accounts.length - 1 ? `1px solid ${t.borderLight}` : 'none', background: isCurrent ? t.primaryPale : 'none', transition: 'background 0.15s' }}>
+              <button type="button" key={`${acc.role}:${acc.identifier.toLocaleLowerCase()}`} onClick={() => selectAccount(acc)} aria-current={isCurrent ? 'true' : undefined}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '16px 18px', border: 'none', borderBottom: i < accounts.length - 1 ? `1px solid ${t.borderLight}` : 'none', background: isCurrent ? t.primaryPale : 'none', transition: 'background 0.15s', cursor: isCurrent ? 'default' : 'pointer', textAlign: isRTL ? 'right' : 'left' }}>
                 <div style={{ width: 40, height: 40, borderRadius: '50%', background: t.primary, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <span style={{ fontSize: 15, fontWeight: 700, color: '#FFFFFF' }}>{acc.initials}</span>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: '#FFFFFF' }}><bdi>{initials}</bdi></span>
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                    <p style={{ fontSize: 14, fontWeight: 600, color: t.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{acc.name}</p>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: t.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}><bdi>{acc.name}</bdi></p>
                     {isCurrent && <span style={{ fontSize: 10, fontWeight: 600, color: t.primary, background: t.primaryPale, padding: '2px 7px', borderRadius: 10 }}>{tr('word_active')}</span>}
                   </div>
-                  <p style={{ fontSize: 12, color: t.textFaint, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{acc.detail}</p>
+                  <p style={{ fontSize: 12, color: t.textFaint, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}><bdi>{acc.email || acc.identifier}</bdi></p>
                 </div>
-                {rolePill(acc.roleKey)}
-              </div>
+                {rolePill(roleKey)}
+              </button>
             );
           })}
 
-          <button onClick={() => navigate('signin')}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '16px 18px', background: 'none', border: 'none', borderTop: `1px solid ${t.borderLight}`, cursor: 'pointer', textAlign: 'left' }}>
+          <button onClick={() => { clearCurrentUser(); resetTo('signin'); }}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '16px 18px', background: 'none', border: 'none', borderTop: `1px solid ${t.borderLight}`, cursor: 'pointer', textAlign: isRTL ? 'right' : 'left' }}>
             <div style={{ width: 40, height: 40, borderRadius: '50%', background: t.mutedSurface, border: `1.5px dashed ${t.cardBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.textFaint} strokeWidth="1.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
             </div>

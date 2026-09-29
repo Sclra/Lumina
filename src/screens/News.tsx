@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { NavProps } from '../App';
 import { useTheme } from '../theme';
 import { useLang } from '../lang';
-import { newsDateTimestamp, type NewsCategory } from '../data/newsData';
+import { compareNewsNewestFirst, displayNewsDate, type NewsCategory } from '../data/newsData';
 import usePublishedNews from '../data/usePublishedNews';
 
 const catColor: Record<string, string> = {
@@ -22,7 +22,7 @@ const GOLDEN_GRADIENT = 'linear-gradient(135deg, #B8860B 0%, #DAA520 50%, #B8860
 
 export default function News({ navigate }: NavProps) {
   const { t, darkMode } = useTheme();
-  const { tr } = useLang();
+  const { tr, lang } = useLang();
   const allNews = usePublishedNews();
   const [activeCategory, setActiveCategory] = useState<NewsCategory>('All');
 
@@ -41,15 +41,22 @@ export default function News({ navigate }: NavProps) {
       ? allNews.filter(n => n.golden)
       : allNews.filter(n => n.category === activeCategory);
 
-  const filtered = [...categoryItems].sort((a, b) =>
-    newsDateTimestamp(b.date) - newsDateTimestamp(a.date) || b.id - a.id
-  );
+  const filtered = [...categoryItems].sort(compareNewsNewestFirst);
 
   return (
-    <div style={{ background: t.bg, minHeight: '100%', paddingBottom: 80, transition: 'background 0.3s', position: 'relative' }}>
+    <div style={{ background: t.bg, minHeight: '100%', paddingBottom: 24, transition: 'background 0.3s' }}>
       <div style={{ padding: '16px 24px 14px' }}>
         <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', color: t.primary, textTransform: 'uppercase', marginBottom: 4 }}>{tr('app_name_upper')}</p>
-        <h1 style={{ fontSize: 26, fontWeight: 700, color: t.text, marginBottom: 2 }}>{tr('news_title')}</h1>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 2 }}>
+          <h1 style={{ fontSize: lang === 'en' ? 'clamp(17px, 5vw, 20px)' : 26, fontWeight: 700, color: t.text, lineHeight: 1.15, minWidth: 0, whiteSpace: lang === 'en' ? 'nowrap' : undefined }}>{tr('news_title')}</h1>
+          <button type="button" onClick={() => navigate('news-create')}
+            style={{ background: t.primary, color: t.primaryText, border: 'none', borderRadius: 28,
+              padding: lang === 'en' ? '8px 10px' : '12px 18px', display: 'inline-flex', alignItems: 'center', gap: lang === 'en' ? 5 : 7,
+              fontSize: lang === 'en' ? 11 : 13, fontWeight: 600, cursor: 'pointer', maxWidth: '100%', flexShrink: lang === 'en' ? 0 : undefined, whiteSpace: lang === 'en' ? 'nowrap' : undefined }}>
+            <span aria-hidden="true" style={{ fontSize: lang === 'en' ? 16 : 20, lineHeight: 1 }}>+</span>
+            <span>{tr('news_create_title')}</span>
+          </button>
+        </div>
         <p style={{ fontSize: 13, color: t.textFaint }}>{tr('news_subtitle')}</p>
       </div>
 
@@ -97,7 +104,7 @@ export default function News({ navigate }: NavProps) {
               style={{
                 background: t.card,
                 border: isGoldenItem ? `1.5px solid #DAA52060` : `1.5px solid ${t.cardBorder}`,
-                borderLeft: isGoldenItem ? `4px solid #DAA520` : undefined,
+                borderInlineStart: isGoldenItem ? `4px solid #DAA520` : undefined,
                 borderRadius: 18, overflow: 'hidden', marginBottom: 12, cursor: 'pointer',
                 opacity: item.read ? 0.82 : 1, transition: 'background 0.3s',
               }}>
@@ -114,17 +121,16 @@ export default function News({ navigate }: NavProps) {
               )}
               <div style={{ padding: '14px 16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 6, flexWrap: 'wrap' }}>
-                  {isGoldenItem ? (
+                  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', color: catColor[item.category], textTransform: 'uppercase', background: darkMode ? catBgDark[item.category] : catBgLight[item.category], padding: '2px 8px', borderRadius: 8 }}>
+                    {tr(`news_cat_${item.category.toLowerCase()}` as 'news_cat_water' | 'news_cat_gas' | 'news_cat_energy' | 'news_cat_general')}
+                  </span>
+                  {isGoldenItem && (
                     <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', color: '#B8860B', textTransform: 'uppercase', background: darkMode ? '#1A1400' : '#FDF6E3', padding: '2px 8px', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 3 }}>
                       <span>★</span> {tr('news_cat_golden')}
                     </span>
-                  ) : (
-                    <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', color: catColor[item.category], textTransform: 'uppercase', background: darkMode ? catBgDark[item.category] : catBgLight[item.category], padding: '2px 8px', borderRadius: 8 }}>
-                      {tr(`news_cat_${item.category.toLowerCase()}` as any) || item.category}
-                    </span>
                   )}
                   <span style={{ fontSize: 10, color: t.textFaint }}>•</span>
-                  <span style={{ fontSize: 11, color: t.textFaint }}>{item.date}</span>
+                  <span style={{ fontSize: 11, color: t.textFaint }}>{displayNewsDate(item.date, lang)}</span>
                   {item.featured && !isGoldenItem && (
                     <>
                       <span style={{ fontSize: 10, color: t.textFaint }}>•</span>
@@ -143,31 +149,6 @@ export default function News({ navigate }: NavProps) {
         })}
       </div>
 
-      {/* FAB: Create News */}
-      <button
-        onClick={() => navigate('news-create')}
-        style={{
-          position: 'fixed',
-          bottom: 88,
-          right: 24,
-          background: t.primary,
-          color: '#fff',
-          border: 'none',
-          borderRadius: 28,
-          padding: '12px 18px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 7,
-          fontSize: 13,
-          fontWeight: 600,
-          cursor: 'pointer',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
-          zIndex: 10,
-        }}
-      >
-        <span style={{ fontSize: 20, lineHeight: 1 }}>+</span>
-        <span>Create News</span>
-      </button>
     </div>
   );
 }

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import type { NavProps } from '../App';
 import { useTheme } from '../theme';
 import { useLang } from '../lang';
+import { useProfile } from '../profile';
+import { useManager } from '../managerStore';
 
 const AccountIcon = ({ color }: { color: string }) => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>;
 const BellIcon = ({ color }: { color: string }) => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>;
@@ -12,12 +14,14 @@ const HelpIcon = ({ color }: { color: string }) => <svg width="18" height="18" v
 const LogOutIcon = ({ color }: { color: string }) => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>;
 const ChevronIcon = ({ color }: { color: string }) => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round"><path d="M9 18l6-6-6-6" /></svg>;
 
-export default function Settings({ navigate, params }: NavProps) {
+export default function Settings({ navigate, resetTo, params }: NavProps) {
   const { t } = useTheme();
   const { tr, isRTL } = useLang();
   const [search, setSearch] = useState('');
   const [showLogout, setShowLogout] = useState(false);
   const isManager = !!params.isManager;
+  const profile = useProfile(isManager ? 'manager' : 'resident');
+  const { signOutUser } = useManager();
 
   const items = [
     { id: 'accounts',               label: tr('settings_accounts'),      Icon: AccountIcon },
@@ -61,14 +65,14 @@ export default function Settings({ navigate, params }: NavProps) {
       <div style={{ padding: '0 24px 16px' }}>
         <div style={{ background: t.primary, borderRadius: 18, padding: '18px 20px', display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <span style={{ fontSize: 18, fontWeight: 700, color: '#FFFFFF' }}>{isManager ? 'AM' : 'SJ'}</span>
+            <span style={{ fontSize: 18, fontWeight: 700, color: '#FFFFFF' }}><bdi>{profile.initials}</bdi></span>
           </div>
-          <div>
+          <div style={{ minWidth: 0 }}>
             <p style={{ fontSize: 16, fontWeight: 700, color: '#FFFFFF', marginBottom: 3 }}>
-              {isManager ? tr('settings_profile_manager') : tr('settings_profile_resident')}
+              <bdi style={{ overflowWrap: 'anywhere' }}>{profile.name}</bdi>
             </p>
             <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.62)' }}>
-              {isManager ? tr('settings_profile_manager_sub') : tr('settings_profile_resident_sub')}
+              <bdi>{profile.subtitle}</bdi>
             </p>
           </div>
         </div>
@@ -108,7 +112,7 @@ export default function Settings({ navigate, params }: NavProps) {
             <p style={{ fontSize: 14, color: t.textFaint, textAlign: 'center', lineHeight: 1.5, marginBottom: 24 }}>
               {isManager ? tr('logout_msg_manager') : tr('logout_msg_resident')}
             </p>
-            <button onClick={() => navigate('signin')} style={{ width: '100%', padding: '15px', borderRadius: 14, marginBottom: 10, background: t.dueBg, color: t.dueText, fontWeight: 600, fontSize: 15, border: `1px solid ${t.dueDot}40`, cursor: 'pointer' }}>
+            <button onClick={() => { signOutUser(); resetTo('signin'); }} style={{ width: '100%', padding: '15px', borderRadius: 14, marginBottom: 10, background: t.dueBg, color: t.dueText, fontWeight: 600, fontSize: 15, border: `1px solid ${t.dueDot}40`, cursor: 'pointer' }}>
               {tr('btn_yes_sign_out')}
             </button>
             <button onClick={() => setShowLogout(false)} style={{ width: '100%', padding: '15px', borderRadius: 14, background: t.mutedSurface, color: t.text, fontWeight: 600, fontSize: 15, border: `1px solid ${t.cardBorder}`, cursor: 'pointer' }}>

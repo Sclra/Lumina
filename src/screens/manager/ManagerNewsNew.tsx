@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { NavProps } from '../../App';
 import { useTheme } from '../../theme';
 import { useManager, type Announcement } from '../../managerStore';
-import { ManagerHeader, Field, inputStyle, PrimaryButton } from './mui';
+import { ManagerHeader, Field, inputStyle, PrimaryButton, Toggle } from './mui';
 import { useLang } from '../../lang';
 
 const cats: Announcement['category'][] = ['General', 'Water', 'Gas', 'Energy'];
@@ -19,12 +19,13 @@ export default function ManagerNewsNew({ goBack }: NavProps) {
   const [category, setCategory] = useState<Announcement['category']>('General');
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
+  const [golden, setGolden] = useState(false);
 
   const canSubmit = title.trim() && body.trim();
 
   const submit = () => {
     if (!canSubmit) return;
-    addAnnouncement({ category, title: title.trim(), body: body.trim(), date: todayLabel(), published: true });
+    addAnnouncement({ category, title: title.trim(), body: body.trim(), date: todayLabel(), published: true, golden });
     goBack();
   };
 
@@ -63,6 +64,14 @@ export default function ManagerNewsNew({ goBack }: NavProps) {
             style={{ ...inputStyle(t), resize: 'vertical', lineHeight: 1.55 }}
             placeholder={tr('m_news_message_ph')} />
         </Field>
+
+        <div style={{ background: t.card, border: `1.5px solid ${t.cardBorder}`, borderRadius: 14, padding: '14px 16px', marginBottom: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          <div style={{ minWidth: 0 }}>
+            <p style={{ fontSize: 13.5, fontWeight: 600, color: t.text, marginBottom: 2 }}>{tr('m_news_golden_toggle')}</p>
+            <p style={{ fontSize: 11.5, color: t.textFaint }}>{tr('m_news_golden_hint')}</p>
+          </div>
+          <Toggle on={golden} onChange={setGolden} label={tr('m_news_golden_toggle')} />
+        </div>
 
         <PrimaryButton onClick={submit} disabled={!canSubmit}
           icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={t.primaryText} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>}>

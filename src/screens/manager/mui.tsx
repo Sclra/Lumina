@@ -95,10 +95,10 @@ export function StatusPill({ label, tone }: { label: string; tone: 'paid' | 'due
   );
 }
 
-export function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
+export function Toggle({ on, onChange, label }: { on: boolean; onChange: (v: boolean) => void; label?: string }) {
   const { t } = useTheme();
   return (
-    <button onClick={() => onChange(!on)} style={{
+    <button type="button" role="switch" aria-checked={on} aria-label={label} onClick={() => onChange(!on)} style={{
       width: 46, height: 27, borderRadius: 20, border: 'none', cursor: 'pointer', flexShrink: 0,
       background: on ? t.primary : t.futureDot, position: 'relative', transition: 'background 0.2s', padding: 0,
     }}>

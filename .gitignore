@@ -19,3 +19,7 @@ logs/
 # beside it.
 /.plugins/
 /.opencode-skills/
+
+# Local coding-agent guidance; keep these files out of the repository.
+/AGENTS.md
+/CLAUDE.md
