@@ -2,6 +2,8 @@ import { useRef, type PointerEvent } from 'react';
 import type { Amenity, NavProps } from '../App';
 import { useTheme } from '../theme';
 import { useLang } from '../lang';
+import { formatMoney } from '../formatMoney';
+import { displayStoredDate } from '../formatDate';
 import { useProfile } from '../profile';
 import { compareNewsNewestFirst, displayNewsDate } from '../data/newsData';
 import usePublishedNews from '../data/usePublishedNews';
@@ -108,8 +110,8 @@ export default function Home({ navigate }: NavProps) {
       <div style={{ padding: '0 24px 18px' }}>
         <p style={{ fontSize: 11, fontWeight: 600, color: t.textFaint, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>{tr('home_utilities')}</p>
         {[
-          { icon: 'water', label: tr('home_water_label'), sub: tr('home_water_sub'), status: 'PAID', amount: '$42.5', due: 'Oct 15, 2026', iconBg: '#E8F2FA', iconStroke: '#2D7A9E' },
-          { icon: 'energy', label: tr('home_energy_label'), sub: tr('home_energy_sub'), status: 'DUE', amount: '$118.9', due: 'Oct 15, 2026', iconBg: '#F5EEF8', iconStroke: '#7A5EA0' },
+          { icon: 'water', label: tr('home_water_label'), sub: tr('home_water_sub'), status: 'PAID', amount: '42.5', due: 'Oct 15, 2026', iconBg: '#E8F2FA', iconStroke: '#2D7A9E' },
+          { icon: 'energy', label: tr('home_energy_label'), sub: tr('home_energy_sub'), status: 'DUE', amount: '118.9', due: 'Oct 15, 2026', iconBg: '#F5EEF8', iconStroke: '#7A5EA0' },
         ].map((u) => {
           const isPaid = u.status === 'PAID';
           return (
@@ -134,9 +136,9 @@ export default function Home({ navigate }: NavProps) {
               <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
                 <div>
                   <p style={{ fontSize: 9, fontWeight: 700, color: t.textFaint, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{tr('home_due_date')}</p>
-                  <p style={{ fontSize: 12, color: t.textMuted }}>{u.due}</p>
+                  <p style={{ fontSize: 12, color: t.textMuted }}>{displayStoredDate(u.due, lang)}</p>
                 </div>
-                <p style={{ fontSize: 26, fontWeight: 700, color: t.text, lineHeight: 1 }}>{u.amount}</p>
+                <p style={{ fontSize: 26, fontWeight: 700, color: t.text, lineHeight: 1 }}>{formatMoney(u.amount, lang)}</p>
               </div>
             </div>
           );

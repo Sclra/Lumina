@@ -1,3 +1,5 @@
+import { formatDate } from '../formatDate';
+
 export type NewsCategory = 'All' | 'Water' | 'Gas' | 'Energy' | 'General' | 'Golden';
 
 export interface NewsItem {
@@ -47,7 +49,7 @@ export function compareNewsNewestFirst(a: NewsItem, b: NewsItem): number {
 export function displayNewsDate(value: string, lang: 'en' | 'fa'): string {
   if (lang === 'en') return value;
   const date = parseNewsDate(value);
-  return date ? new Intl.DateTimeFormat('fa-IR-u-ca-gregory', { day: 'numeric', month: 'long', year: 'numeric' }).format(date) : value;
+  return date ? formatDate(date, lang) : value;
 }
 
 export function isNewsDateToday(value: string, today = new Date()): boolean {

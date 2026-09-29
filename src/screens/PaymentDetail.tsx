@@ -1,6 +1,8 @@
 import type { NavProps, PaymentType } from '../App';
 import { useTheme } from '../theme';
 import { useLang } from '../lang';
+import { formatMoney } from '../formatMoney';
+import { displayGregorianPeriod } from '../formatDate';
 
 type MonthStatus = 'PAID' | 'DUE' | 'FUTURE';
 
@@ -12,9 +14,11 @@ const paymentDataBase: Record<PaymentType, { nameKey: string; statuses: MonthSta
 
 export default function PaymentDetail({ navigate, goBack, params }: NavProps) {
   const { t } = useTheme();
-  const { tr, isRTL } = useLang();
+  const { tr, isRTL, lang } = useLang();
   const type = params.paymentType ?? 'apartment';
-  const MONTHS = [tr('month_jan'),tr('month_feb'),tr('month_mar'),tr('month_apr'),tr('month_may'),tr('month_jun'),tr('month_jul'),tr('month_aug'),tr('month_sep'),tr('month_oct'),tr('month_nov'),tr('month_dec')];
+  const monthKeys = ['month_jan','month_feb','month_mar','month_apr','month_may','month_jun','month_jul','month_aug','month_sep','month_oct','month_nov','month_dec'] as const;
+  const englishMonths = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const MONTHS = monthKeys.map((key, index) => lang === 'fa' ? displayGregorianPeriod(`${englishMonths[index]} 2026`, lang, true) : tr(key));
   const base = paymentDataBase[type];
   const data = { ...base, name: tr(base.nameKey as Parameters<typeof tr>[0]) };
 
@@ -52,7 +56,7 @@ export default function PaymentDetail({ navigate, goBack, params }: NavProps) {
                       <div style={{ width: 6, height: 6, borderRadius: '50%', background: dotColor(status), flexShrink: 0 }} />
                       <span style={{ fontSize: 10, fontWeight: 600, color: labelColor(status), letterSpacing: '0.04em' }}>{status === 'PAID' ? tr('word_paid') : status === 'DUE' ? tr('word_due') : tr('word_future')}</span>
                     </div>
-                    {status !== 'FUTURE' && <p style={{ fontSize: 11, color: t.textFaint, marginTop: 3 }}>${amount.toFixed(0)}</p>}
+                    {status !== 'FUTURE' && <p style={{ fontSize: 11, color: t.textFaint, marginTop: 3 }}>{formatMoney(amount.toFixed(0), lang)}</p>}
                   </div>
                 );
               })}

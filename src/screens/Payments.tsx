@@ -1,13 +1,15 @@
 import type { NavProps, PaymentType } from '../App';
 import { useTheme } from '../theme';
 import { useLang } from '../lang';
+import { formatMoney } from '../formatMoney';
+import { displayGregorianPeriod, displayStoredDate } from '../formatDate';
 
 interface PaymentCard { type: PaymentType; name: string; period: string; amount: string; status: 'PAID' | 'DUE' | 'FUTURE'; due: string; icon: 'home' | 'water' | 'energy' }
 
 const paymentDefs: { type: PaymentType; nameKey: string; period: string; amount: string; status: 'PAID' | 'DUE' | 'FUTURE'; due: string; icon: 'home' | 'water' | 'energy' }[] = [
-  { type: 'apartment', nameKey: 'payments_apartment', period: 'Aug 2026', amount: '$120.00', status: 'PAID', due: 'Paid Aug 12', icon: 'home' },
-  { type: 'water', nameKey: 'payments_water', period: 'Aug 2026', amount: '$42.50', status: 'DUE', due: 'Due Oct 15, 2026', icon: 'water' },
-  { type: 'energy', nameKey: 'payments_energy', period: 'Aug 2026', amount: '$118.90', status: 'DUE', due: 'Due Oct 15, 2026', icon: 'energy' },
+  { type: 'apartment', nameKey: 'payments_apartment', period: 'Aug 2026', amount: '120.00', status: 'PAID', due: 'Paid Aug 12', icon: 'home' },
+  { type: 'water', nameKey: 'payments_water', period: 'Aug 2026', amount: '42.50', status: 'DUE', due: 'Due Oct 15, 2026', icon: 'water' },
+  { type: 'energy', nameKey: 'payments_energy', period: 'Aug 2026', amount: '118.90', status: 'DUE', due: 'Due Oct 15, 2026', icon: 'energy' },
 ];
 
 const iconConfigs = {
@@ -18,7 +20,7 @@ const iconConfigs = {
 
 export default function Payments({ navigate }: NavProps) {
   const { t, darkMode } = useTheme();
-  const { tr } = useLang();
+  const { tr, lang } = useLang();
 
   const payments: PaymentCard[] = paymentDefs.map(({ nameKey, ...d }) => ({ ...d, name: tr(nameKey as Parameters<typeof tr>[0]) }));
 
@@ -45,7 +47,7 @@ export default function Payments({ navigate }: NavProps) {
                   </div>
                   <div>
                     <p style={{ fontSize: 15, fontWeight: 600, color: t.text, marginBottom: 2 }}>{p.name}</p>
-                    <p style={{ fontSize: 12, color: t.textFaint }}>{p.period}</p>
+                    <p style={{ fontSize: 12, color: t.textFaint }}>{displayGregorianPeriod(p.period, lang)}</p>
                   </div>
                 </div>
                 <span style={{ fontSize: 10, fontWeight: 700, padding: '4px 10px', borderRadius: 20, letterSpacing: '0.06em', flexShrink: 0, background: statusBg, color: statusText }}>{p.status === 'PAID' ? tr('word_paid') : p.status === 'DUE' ? tr('word_due') : tr('word_future')}</span>
@@ -53,10 +55,10 @@ export default function Payments({ navigate }: NavProps) {
               <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', paddingTop: 12, borderTop: `1px solid ${t.borderLight}` }}>
                 <div>
                   <p style={{ fontSize: 9, fontWeight: 700, color: t.textFaint, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 3 }}>{p.status === 'PAID' ? tr('payments_payment_date') : tr('payments_due_date')}</p>
-                  <p style={{ fontSize: 13, color: t.textMuted, fontWeight: 500 }}>{p.due}</p>
+                  <p style={{ fontSize: 13, color: t.textMuted, fontWeight: 500 }}>{lang === 'fa' ? `${tr(p.status === 'PAID' ? 'word_paid' : 'word_due')} ${displayStoredDate(p.status === 'PAID' ? 'Aug 12, 2026' : p.due.replace('Due ', ''), lang)}` : p.due}</p>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <p style={{ fontSize: 22, fontWeight: 700, color: t.text }}>{p.amount}</p>
+                  <p style={{ fontSize: 22, fontWeight: 700, color: t.text }}>{formatMoney(p.amount, lang)}</p>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={t.textFaint} strokeWidth="1.5" strokeLinecap="round"><path d="M9 18l6-6-6-6" /></svg>
                 </div>
               </div>
@@ -67,7 +69,7 @@ export default function Payments({ navigate }: NavProps) {
 
       <div style={{ margin: '4px 24px 0', background: t.primary, borderRadius: 18, padding: '16px 20px' }}>
         <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginBottom: 6 }}>{tr('payments_outstanding')}</p>
-        <p style={{ fontSize: 28, fontWeight: 700, color: '#FFFFFF' }}>$161.40</p>
+        <p style={{ fontSize: 28, fontWeight: 700, color: '#FFFFFF' }}>{formatMoney('161.40', lang)}</p>
         <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>{tr('payments_due_count')}</p>
       </div>
     </div>

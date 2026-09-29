@@ -63,21 +63,59 @@ export const dark: ThemeTokens = {
   navBg: '#1C2220',
 };
 
+export type AccentTone = 'green' | 'purple' | 'blue';
+
+function getInitialAccent(): AccentTone {
+  try {
+    const saved = localStorage.getItem('lumina_accent');
+    return saved === 'purple' || saved === 'blue' ? saved : 'green';
+  } catch { return 'green'; }
+}
+
+const purpleLight: ThemeTokens = {
+  ...light, primary: '#694391', primaryPale: '#F2ECF8',
+};
+
+const purpleDark: ThemeTokens = {
+  ...dark, primary: '#9C77C4', primaryPale: '#271D34',
+};
+
+const blueLight: ThemeTokens = {
+  ...light, primary: '#285A91', primaryPale: '#EAF2FC',
+};
+
+const blueDark: ThemeTokens = {
+  ...dark, primary: '#85B8F2', primaryPale: '#172B43',
+};
+
 interface ThemeCtx {
   darkMode: boolean;
+  accentTone: AccentTone;
+  setAccentTone: (tone: AccentTone) => void;
   setDarkMode: (v: boolean) => void;
   t: ThemeTokens;
 }
 
 const ThemeContext = createContext<ThemeCtx>({
   darkMode: false,
+  accentTone: 'green',
+  setAccentTone: () => {},
   setDarkMode: () => {},
   t: light,
 });
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [darkMode, setDarkMode] = useState(false);
-  const theme = darkMode ? dark : light;
+  const [accentTone, setAccentToneState] = useState<AccentTone>(getInitialAccent);
+  const setAccentTone = (tone: AccentTone) => {
+    setAccentToneState(tone);
+    try { localStorage.setItem('lumina_accent', tone); } catch {}
+  };
+  const theme = accentTone === 'purple'
+    ? (darkMode ? purpleDark : purpleLight)
+    : accentTone === 'blue'
+      ? (darkMode ? blueDark : blueLight)
+      : (darkMode ? dark : light);
 
   useEffect(() => {
     document.documentElement.style.setProperty('--app-background', theme.bg);
@@ -85,7 +123,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [theme.bg]);
 
   return (
-    <ThemeContext.Provider value={{ darkMode, setDarkMode, t: theme }}>
+    <ThemeContext.Provider value={{ darkMode, setDarkMode, accentTone, setAccentTone, t: theme }}>
       {children}
     </ThemeContext.Provider>
   );

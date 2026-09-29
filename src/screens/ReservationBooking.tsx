@@ -29,7 +29,7 @@ export default function ReservationBooking({ navigate, goBack, params }: NavProp
     date.setDate(date.getDate() + offset);
     return date;
   });
-  const locale = lang === 'fa' ? 'fa-IR' : 'en-US';
+  const locale = lang === 'fa' ? 'fa-IR-u-ca-persian' : 'en-US';
   const validParkingRange = Boolean(parkingFrom && parkingTo && parkingTo > parkingFrom);
   const invalidParkingRange = Boolean(parkingFrom && parkingTo && !validParkingRange);
   const canConfirm = selectedDay !== null && (dayOnly || (isParking ? validParkingRange : selectedTime !== null));

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import type { NavProps, PaymentType } from '../App';
 import { useTheme } from '../theme';
 import { useLang } from '../lang';
+import { formatMoney } from '../formatMoney';
+import { displayGregorianPeriod, displayStoredDate } from '../formatDate';
 
 const paymentInfoBase: Record<PaymentType, { nameKey: string; breakdownKeys: string[]; breakdownAmounts: number[]; dueDay: number; paidDay: number | null }> = {
   apartment: { nameKey: 'payments_apartment', breakdownKeys: ['pb_apartment_base','pb_apartment_maintenance','pb_apartment_parking','pb_apartment_insurance'], breakdownAmounts: [120,35,20,10], dueDay: 15, paidDay: 12 },
@@ -11,12 +13,13 @@ const paymentInfoBase: Record<PaymentType, { nameKey: string; breakdownKeys: str
 
 export default function MonthlyDetail({ goBack, params }: NavProps) {
   const { t } = useTheme();
-  const { tr, isRTL } = useLang();
+  const { tr, isRTL, lang } = useLang();
   const [downloaded, setDownloaded] = useState(false);
   const type = params.paymentType ?? 'apartment';
   const month = params.month ?? 0;
 
-  const MONTHS = [tr('month_full_jan'),tr('month_full_feb'),tr('month_full_mar'),tr('month_full_apr'),tr('month_full_may'),tr('month_full_jun'),tr('month_full_jul'),tr('month_full_aug'),tr('month_full_sep'),tr('month_full_oct'),tr('month_full_nov'),tr('month_full_dec')];
+  const englishMonths = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const monthKeys = ['month_full_jan','month_full_feb','month_full_mar','month_full_apr','month_full_may','month_full_jun','month_full_jul','month_full_aug','month_full_sep','month_full_oct','month_full_nov','month_full_dec'] as const;
 
   const infoBase = paymentInfoBase[type];
   const info = {
@@ -41,7 +44,7 @@ export default function MonthlyDetail({ goBack, params }: NavProps) {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.primary} strokeWidth="2" strokeLinecap="round" style={{ transform: isRTL ? 'scaleX(-1)' : undefined }}><path d="M15 18l-6-6 6-6" /></svg>
           <span style={{ fontSize: 12, color: t.textMuted }}>{tr('app_name_upper')}</span>
         </button>
-        <h1 style={{ fontSize: 24, fontWeight: 700, color: t.text, marginBottom: 2 }}>{MONTHS[month]} 2026</h1>
+        <h1 style={{ fontSize: 24, fontWeight: 700, color: t.text, marginBottom: 2 }}>{lang === 'fa' ? displayGregorianPeriod(`${englishMonths[month]} 2026`, lang) : `${tr(monthKeys[month])} 2026`}</h1>
         <p style={{ fontSize: 13, color: t.textFaint, marginBottom: 18 }}>{info.name}</p>
       </div>
 
@@ -51,7 +54,7 @@ export default function MonthlyDetail({ goBack, params }: NavProps) {
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
             <div>
               <span style={{ fontSize: 10, fontWeight: 700, padding: '4px 10px', borderRadius: 20, letterSpacing: '0.06em', display: 'inline-block', marginBottom: 8, background: statusBg, color: statusTx }}>{status === 'PAID' ? tr('word_paid') : status === 'DUE' ? tr('word_due') : tr('word_future')}</span>
-              <p style={{ fontSize: 34, fontWeight: 700, color: t.text, lineHeight: 1 }}>${total.toFixed(2)}</p>
+              <p style={{ fontSize: 34, fontWeight: 700, color: t.text, lineHeight: 1 }}>{formatMoney(total.toFixed(2), lang)}</p>
               <p style={{ fontSize: 11, color: t.textFaint, marginTop: 4 }}>{info.name}</p>
             </div>
             {status === 'PAID' && (
@@ -63,12 +66,12 @@ export default function MonthlyDetail({ goBack, params }: NavProps) {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, paddingTop: 14, borderTop: `1px solid ${t.borderLight}` }}>
             <div>
               <p style={{ fontSize: 9, fontWeight: 700, color: t.textFaint, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 3 }}>{tr('payments_due_date')}</p>
-              <p style={{ fontSize: 13, fontWeight: 600, color: t.text }}>Jan {info.dueDay}, 2026</p>
+              <p style={{ fontSize: 13, fontWeight: 600, color: t.text }}>{displayStoredDate(`Jan ${info.dueDay}, 2026`, lang)}</p>
             </div>
             <div>
               <p style={{ fontSize: 9, fontWeight: 700, color: t.textFaint, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 3 }}>{tr('monthly_charged_on')}</p>
               <p style={{ fontSize: 13, fontWeight: 600, color: status === 'PAID' ? t.paidText : t.textFaint }}>
-                {status === 'PAID' ? `Jan ${info.paidDay}, 2026` : '—'}
+                {status === 'PAID' ? displayStoredDate(`Jan ${info.paidDay}, 2026`, lang) : '—'}
               </p>
             </div>
           </div>
@@ -82,12 +85,12 @@ export default function MonthlyDetail({ goBack, params }: NavProps) {
           {info.breakdowns.map((item, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderBottom: i < info.breakdowns.length - 1 ? `1px solid ${t.borderLight}` : 'none' }}>
               <span style={{ fontSize: 14, color: t.text }}>{item.label}</span>
-              <span style={{ fontSize: 14, fontWeight: 600, color: t.text }}>${item.amount.toFixed(2)}</span>
+              <span style={{ fontSize: 14, fontWeight: 600, color: t.text }}>{formatMoney(item.amount.toFixed(2), lang)}</span>
             </div>
           ))}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 18px', background: t.mutedSurface, borderTop: `2px solid ${t.cardBorder}` }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: t.text }}>Total Statement</span>
-            <span style={{ fontSize: 16, fontWeight: 700, color: t.text }}>${total.toFixed(2)}</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: t.text }}>{tr('word_total')}</span>
+            <span style={{ fontSize: 16, fontWeight: 700, color: t.text }}>{formatMoney(total.toFixed(2), lang)}</span>
           </div>
         </div>
       </div>
