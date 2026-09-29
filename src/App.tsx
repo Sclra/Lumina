@@ -50,6 +50,7 @@ export type Amenity = 'gym' | 'rooftop' | 'pool' | 'guest-parking' | 'community-
 export interface NavParams {
   paymentType?: PaymentType;
   month?: number;
+  year?: number;
   amenity?: Amenity;
   bookingDate?: string;
   bookingTime?: string;

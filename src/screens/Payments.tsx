@@ -1,14 +1,8 @@
 import type { NavProps, PaymentType } from '../App';
 import { useTheme } from '../theme';
 import { useLang } from '../lang';
-
-interface PaymentCard { type: PaymentType; name: string; period: string; amount: string; status: 'PAID' | 'DUE' | 'FUTURE'; due: string; icon: 'home' | 'water' | 'energy' }
-
-const paymentDefs: { type: PaymentType; nameKey: string; period: string; amount: string; status: 'PAID' | 'DUE' | 'FUTURE'; due: string; icon: 'home' | 'water' | 'energy' }[] = [
-  { type: 'apartment', nameKey: 'payments_apartment', period: 'Aug 2026', amount: '$120.00', status: 'PAID', due: 'Paid Aug 12', icon: 'home' },
-  { type: 'water', nameKey: 'payments_water', period: 'Aug 2026', amount: '$42.50', status: 'DUE', due: 'Due Oct 15, 2026', icon: 'water' },
-  { type: 'energy', nameKey: 'payments_energy', period: 'Aug 2026', amount: '$118.90', status: 'DUE', due: 'Due Oct 15, 2026', icon: 'energy' },
-];
+import { getPayment } from '../data/payments';
+import { currentSolarDate, formatSolarDate, formatSolarMonth } from '../data/solarHijri';
 
 const iconConfigs = {
   home:   { bg: '#E8F0EE', darkBg: '#0E2018', stroke: '#1A4A38', path: <><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" /><path d="M9 21V13h6v8" /></> },
@@ -18,9 +12,20 @@ const iconConfigs = {
 
 export default function Payments({ navigate }: NavProps) {
   const { t, darkMode } = useTheme();
-  const { tr } = useLang();
+  const { tr, lang } = useLang();
 
-  const payments: PaymentCard[] = paymentDefs.map(({ nameKey, ...d }) => ({ ...d, name: tr(nameKey as Parameters<typeof tr>[0]) }));
+  const today = currentSolarDate();
+  const payments = (['apartment', 'water', 'energy'] as PaymentType[]).map(type => {
+    const payment = getPayment(type, today.year, today.month, today);
+    return {
+      ...payment, type, name: tr(payment.nameKey),
+      period: formatSolarMonth(today.year, today.month, lang),
+      amount: `$${payment.total.toFixed(2)}`,
+      due: formatSolarDate(payment.paidDate ?? payment.dueDate, lang),
+      icon: type === 'apartment' ? 'home' as const : type,
+    };
+  });
+  const outstanding = payments.filter(p => p.status === 'DUE').reduce((sum, p) => sum + p.total, 0);
 
   return (
     <div style={{ background: t.bg, minHeight: '100%', paddingBottom: 16 }}>
@@ -36,7 +41,7 @@ export default function Payments({ navigate }: NavProps) {
           const statusBg = p.status === 'PAID' ? t.paidBg : p.status === 'DUE' ? t.dueBg : t.futureBg;
           const statusText = p.status === 'PAID' ? t.paidText : p.status === 'DUE' ? t.dueText : t.futureText;
           return (
-            <div key={p.type} onClick={() => navigate('payment-detail', { paymentType: p.type })}
+            <div key={p.type} onClick={() => navigate('payment-detail', { paymentType: p.type, year: today.year })}
               style={{ background: t.card, border: `1.5px solid ${t.cardBorder}`, borderRadius: 18, padding: '18px', marginBottom: 12, cursor: 'pointer', transition: 'background 0.3s' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -67,7 +72,7 @@ export default function Payments({ navigate }: NavProps) {
 
       <div style={{ margin: '4px 24px 0', background: t.primary, borderRadius: 18, padding: '16px 20px' }}>
         <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginBottom: 6 }}>{tr('payments_outstanding')}</p>
-        <p style={{ fontSize: 28, fontWeight: 700, color: '#FFFFFF' }}>$161.40</p>
+        <p style={{ fontSize: 28, fontWeight: 700, color: '#FFFFFF' }}>${outstanding.toFixed(2)}</p>
         <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>{tr('payments_due_count')}</p>
       </div>
     </div>

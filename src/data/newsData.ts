@@ -44,10 +44,10 @@ export function compareNewsNewestFirst(a: NewsItem, b: NewsItem): number {
   return newsDateTimestamp(b.date) - newsDateTimestamp(a.date) || b.id - a.id;
 }
 
-export function displayNewsDate(value: string, lang: 'en' | 'fa'): string {
-  if (lang === 'en') return value;
+export function displayNewsDate(value: string, lang: 'en' | 'fa', calendar: 'gregory' | 'persian' = 'gregory'): string {
+  if (lang === 'en' && calendar === 'gregory') return value;
   const date = parseNewsDate(value);
-  return date ? new Intl.DateTimeFormat('fa-IR-u-ca-gregory', { day: 'numeric', month: 'long', year: 'numeric' }).format(date) : value;
+  return date ? new Intl.DateTimeFormat(lang === 'fa' ? 'fa-IR' : 'en-US', { calendar, day: 'numeric', month: 'long', year: 'numeric' }).format(date) : value;
 }
 
 export function isNewsDateToday(value: string, today = new Date()): boolean {
