@@ -149,7 +149,7 @@ export default function Home({ navigate }: NavProps) {
           <p style={{ fontSize: 11, fontWeight: 600, color: t.textFaint, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{tr('home_latest_news')}</p>
           <button onClick={() => navigate('news')} style={{ fontSize: 12, color: t.primary, fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer' }}>{tr('btn_view_all')}</button>
         </div>
-        <div tabIndex={0} role="region" aria-label={tr('home_latest_news')}
+        <div className="scrollbar-hide" tabIndex={0} role="region" aria-label={tr('home_latest_news')}
           style={{ maxHeight: 240, overflowY: 'auto', padding: 2 }}>
           {goldenNews.length === 0 && (
             <p style={{ background: t.card, border: `1.5px solid ${t.cardBorder}`, borderRadius: 14, padding: '18px 16px', color: t.textMuted, fontSize: 12, textAlign: 'center' }}>
