@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { NavProps } from '../App';
 import { useTheme } from '../theme';
 import { useLang } from '../lang';
+import { formatMoney } from '../formatMoney';
 import { getPayment } from '../data/payments';
 import { currentSolarDate, formatSolarDate, formatSolarMonth } from '../data/solarHijri';
 
@@ -42,7 +43,7 @@ export default function MonthlyDetail({ goBack, params }: NavProps) {
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
             <div>
               <span style={{ fontSize: 10, fontWeight: 700, padding: '4px 10px', borderRadius: 20, letterSpacing: '0.06em', display: 'inline-block', marginBottom: 8, background: statusBg, color: statusTx }}>{status === 'PAID' ? tr('word_paid') : status === 'DUE' ? tr('word_due') : tr('word_future')}</span>
-              <p style={{ fontSize: 34, fontWeight: 700, color: t.text, lineHeight: 1 }}>${total.toFixed(2)}</p>
+              <p style={{ fontSize: 34, fontWeight: 700, color: t.text, lineHeight: 1 }}>{formatMoney(total.toFixed(2), lang)}</p>
               <p style={{ fontSize: 11, color: t.textFaint, marginTop: 4 }}>{info.name}</p>
             </div>
             {status === 'PAID' && (
@@ -73,12 +74,12 @@ export default function MonthlyDetail({ goBack, params }: NavProps) {
           {info.breakdowns.map((item, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderBottom: i < info.breakdowns.length - 1 ? `1px solid ${t.borderLight}` : 'none' }}>
               <span style={{ fontSize: 14, color: t.text }}>{item.label}</span>
-              <span style={{ fontSize: 14, fontWeight: 600, color: t.text }}>${item.amount.toFixed(2)}</span>
+              <span style={{ fontSize: 14, fontWeight: 600, color: t.text }}>{formatMoney(item.amount.toFixed(2), lang)}</span>
             </div>
           ))}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 18px', background: t.mutedSurface, borderTop: `2px solid ${t.cardBorder}` }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: t.text }}>Total Statement</span>
-            <span style={{ fontSize: 16, fontWeight: 700, color: t.text }}>${total.toFixed(2)}</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: t.text }}>{tr('word_total')}</span>
+            <span style={{ fontSize: 16, fontWeight: 700, color: t.text }}>{formatMoney(total.toFixed(2), lang)}</span>
           </div>
         </div>
       </div>

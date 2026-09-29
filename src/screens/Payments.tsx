@@ -1,6 +1,7 @@
 import type { NavProps, PaymentType } from '../App';
 import { useTheme } from '../theme';
 import { useLang } from '../lang';
+import { formatMoney } from '../formatMoney';
 import { getPayment } from '../data/payments';
 import { currentSolarDate, formatSolarDate, formatSolarMonth } from '../data/solarHijri';
 
@@ -20,7 +21,7 @@ export default function Payments({ navigate }: NavProps) {
     return {
       ...payment, type, name: tr(payment.nameKey),
       period: formatSolarMonth(today.year, today.month, lang),
-      amount: `$${payment.total.toFixed(2)}`,
+      amount: payment.total.toFixed(2),
       due: formatSolarDate(payment.paidDate ?? payment.dueDate, lang),
       icon: type === 'apartment' ? 'home' as const : type,
     };
@@ -61,7 +62,7 @@ export default function Payments({ navigate }: NavProps) {
                   <p style={{ fontSize: 13, color: t.textMuted, fontWeight: 500 }}>{p.due}</p>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <p style={{ fontSize: 22, fontWeight: 700, color: t.text }}>{p.amount}</p>
+                  <p style={{ fontSize: 22, fontWeight: 700, color: t.text }}>{formatMoney(p.amount, lang)}</p>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={t.textFaint} strokeWidth="1.5" strokeLinecap="round"><path d="M9 18l6-6-6-6" /></svg>
                 </div>
               </div>
@@ -72,7 +73,7 @@ export default function Payments({ navigate }: NavProps) {
 
       <div style={{ margin: '4px 24px 0', background: t.primary, borderRadius: 18, padding: '16px 20px' }}>
         <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginBottom: 6 }}>{tr('payments_outstanding')}</p>
-        <p style={{ fontSize: 28, fontWeight: 700, color: '#FFFFFF' }}>${outstanding.toFixed(2)}</p>
+        <p style={{ fontSize: 28, fontWeight: 700, color: '#FFFFFF' }}>{formatMoney(outstanding.toFixed(2), lang)}</p>
         <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>{tr('payments_due_count')}</p>
       </div>
     </div>

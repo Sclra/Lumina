@@ -2,6 +2,7 @@ import { useRef, type PointerEvent } from 'react';
 import type { Amenity, NavProps } from '../App';
 import { useTheme } from '../theme';
 import { useLang } from '../lang';
+import { formatMoney } from '../formatMoney';
 import { useProfile } from '../profile';
 import { compareNewsNewestFirst, displayNewsDate } from '../data/newsData';
 import usePublishedNews from '../data/usePublishedNews';
@@ -140,7 +141,7 @@ export default function Home({ navigate }: NavProps) {
                   <p style={{ fontSize: 9, fontWeight: 700, color: t.textFaint, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{tr('home_due_date')}</p>
                   <p style={{ fontSize: 12, color: t.textMuted }}>{formatSolarDate(payment.dueDate, lang)}</p>
                 </div>
-                <p style={{ fontSize: 26, fontWeight: 700, color: t.text, lineHeight: 1 }}>${payment.total.toFixed(2)}</p>
+                <p style={{ fontSize: 26, fontWeight: 700, color: t.text, lineHeight: 1 }}>{formatMoney(payment.total.toFixed(2), lang)}</p>
               </div>
             </div>
           );
@@ -172,7 +173,7 @@ export default function Home({ navigate }: NavProps) {
                 <span style={{ fontSize: 10, fontWeight: 600, color: t.textMuted }}>
                   {tr(`news_cat_${item.category.toLowerCase()}` as 'news_cat_water' | 'news_cat_gas' | 'news_cat_energy' | 'news_cat_general')}
                 </span>
-                <span style={{ fontSize: 10, color: t.textMuted }}>• {displayNewsDate(item.date, lang, 'persian')}</span>
+                <span style={{ fontSize: 10, color: t.textMuted }}>• {displayNewsDate(item.date, lang)}</span>
               </span>
               <span style={{ display: 'block', fontSize: 13, fontWeight: 600, color: t.text, lineHeight: 1.4 }}>{item.title}</span>
               <span style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', fontSize: 12, color: t.textMuted, lineHeight: 1.5, marginTop: 6 }}>{item.desc}</span>

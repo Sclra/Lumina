@@ -3,7 +3,7 @@ import type { NavProps } from '../App';
 import { useTheme } from '../theme';
 import { useLang } from '../lang';
 import { useProfile } from '../profile';
-import { useManager } from '../managerStore';
+import { useManager, type CurrentUser } from '../managerStore';
 
 const AccountIcon = ({ color }: { color: string }) => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>;
 const BellIcon = ({ color }: { color: string }) => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>;
@@ -12,16 +12,29 @@ const SlidersIcon = ({ color }: { color: string }) => <svg width="18" height="18
 const MessageIcon = ({ color }: { color: string }) => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>;
 const HelpIcon = ({ color }: { color: string }) => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" strokeWidth="2" /></svg>;
 const LogOutIcon = ({ color }: { color: string }) => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>;
+const accountKey = (user: CurrentUser) => `${user.role}:${user.identifier.toLocaleLowerCase()}`;
 const ChevronIcon = ({ color }: { color: string }) => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round"><path d="M9 18l6-6-6-6" /></svg>;
 
 export default function Settings({ navigate, resetTo, params }: NavProps) {
   const { t } = useTheme();
   const { tr, isRTL } = useLang();
   const [search, setSearch] = useState('');
-  const [showLogout, setShowLogout] = useState(false);
+  const { accounts, currentUser, apartment, signOutAccounts } = useManager();
+  const [showLogout, setShowLogout] = useState(!!params.openLogout);
+  const [selectedAccountKeys, setSelectedAccountKeys] = useState<string[]>(() => currentUser ? [accountKey(currentUser)] : []);
   const isManager = !!params.isManager;
   const profile = useProfile(isManager ? 'manager' : 'resident');
-  const { signOutUser } = useManager();
+  const selectedAccounts = accounts.filter(account => selectedAccountKeys.includes(accountKey(account)));
+
+  const confirmLogout = () => {
+    if (selectedAccounts.length === 0) return;
+    const remaining = accounts.filter(account => !selectedAccountKeys.includes(accountKey(account)));
+    const activeRemains = currentUser && remaining.some(account => accountKey(account) === accountKey(currentUser));
+    const next = activeRemains ? currentUser : remaining[0];
+    signOutAccounts(selectedAccounts);
+    if (next) resetTo(next.role === 'manager' ? (apartment ? 'm-dashboard' : 'm-setup') : 'home');
+    else resetTo('signin');
+  };
 
   const items = [
     { id: 'accounts',               label: tr('settings_accounts'),      Icon: AccountIcon },
@@ -36,9 +49,13 @@ export default function Settings({ navigate, resetTo, params }: NavProps) {
   const filtered = search ? items.filter(i => i.label.toLowerCase().includes(search.toLowerCase())) : items;
 
   const handleItemClick = (id: string) => {
-    if (id === 'logout') { setShowLogout(true); return; }
+    if (id === 'logout') {
+      setSelectedAccountKeys(currentUser ? [accountKey(currentUser)] : []);
+      setShowLogout(true);
+      return;
+    }
     if (id === 'preferences') { navigate('preferences'); return; }
-    if (id === 'faq') { navigate('faq'); return; }
+    if (id === 'faq') { navigate('faq', { isManager }); return; }
     if (id === 'feedback') { navigate('feedback'); return; }
     if (id === 'language-settings') { navigate('language-settings'); return; }
     if (id === 'notifications-settings') { navigate('notifications-settings'); return; }
@@ -103,19 +120,37 @@ export default function Settings({ navigate, resetTo, params }: NavProps) {
 
       <p style={{ textAlign: 'center', marginTop: 24, fontSize: 12, color: t.textFaint }}>{tr('settings_version')}</p>
 
-      {/* Logout overlay */}
+      {/* Account sign-out sheet */}
       {showLogout && (
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'flex-end', zIndex: 100 }}>
-          <div style={{ background: t.card, borderRadius: '24px 24px 0 0', padding: '28px 24px 48px', width: '100%', transition: 'background 0.3s' }}>
-            <div style={{ width: 36, height: 4, background: t.cardBorder, borderRadius: 4, margin: '0 auto 24px' }} />
-            <h3 style={{ fontSize: 18, fontWeight: 700, color: t.text, textAlign: 'center', marginBottom: 8 }}>{tr('logout_title')}</h3>
-            <p style={{ fontSize: 14, color: t.textFaint, textAlign: 'center', lineHeight: 1.5, marginBottom: 24 }}>
-              {isManager ? tr('logout_msg_manager') : tr('logout_msg_resident')}
-            </p>
-            <button onClick={() => { signOutUser(); resetTo('signin'); }} style={{ width: '100%', padding: '15px', borderRadius: 14, marginBottom: 10, background: t.dueBg, color: t.dueText, fontWeight: 600, fontSize: 15, border: `1px solid ${t.dueDot}40`, cursor: 'pointer' }}>
-              {tr('btn_yes_sign_out')}
+          <div role="dialog" aria-modal="true" aria-label={tr('logout_choose_title')}
+            style={{ background: t.card, borderRadius: '24px 24px 0 0', padding: '24px 24px 36px', width: '100%', maxHeight: '70%', overflowY: 'auto', transition: 'background 0.3s' }}>
+            <div style={{ width: 36, height: 4, background: t.cardBorder, borderRadius: 4, margin: '0 auto 20px' }} />
+            <h3 style={{ fontSize: 18, fontWeight: 700, color: t.text, textAlign: 'center', marginBottom: 6 }}>{tr('logout_choose_title')}</h3>
+            <p style={{ fontSize: 13, color: t.textFaint, textAlign: 'center', lineHeight: 1.5, marginBottom: 18 }}>{tr('logout_choose_desc')}</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 18 }}>
+              {accounts.map(account => {
+                const key = accountKey(account);
+                const checked = selectedAccountKeys.includes(key);
+                const isCurrent = currentUser && accountKey(currentUser) === key;
+                return (
+                  <button key={key} type="button" role="checkbox" aria-checked={checked}
+                    onClick={() => setSelectedAccountKeys(prev => checked ? prev.filter(value => value !== key) : [...prev, key])}
+                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: checked ? t.primaryPale : t.card, border: `1.5px solid ${checked ? t.primary : t.cardBorder}`, borderRadius: 12, cursor: 'pointer', textAlign: 'start' }}>
+                    <span aria-hidden="true" style={{ width: 20, height: 20, borderRadius: 6, border: `2px solid ${checked ? t.primary : t.textFaint}`, background: checked ? t.primary : 'transparent', color: t.primaryText, display: 'grid', placeItems: 'center', flexShrink: 0, fontSize: 14 }}>{checked ? '✓' : ''}</span>
+                    <span style={{ flex: 1, minWidth: 0 }}>
+                      <span style={{ display: 'block', fontSize: 14, fontWeight: 600, color: t.text, overflowWrap: 'anywhere' }}><bdi>{account.name}</bdi></span>
+                      <span style={{ display: 'block', fontSize: 11, color: t.textFaint }}>{tr(account.role === 'manager' ? 'accounts_manager' : 'accounts_resident')}{isCurrent ? ` · ${tr('word_active')}` : ''}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <button type="button" onClick={confirmLogout} disabled={selectedAccounts.length === 0}
+              style={{ width: '100%', padding: '14px', borderRadius: 14, marginBottom: 10, background: t.dueBg, color: t.dueText, fontWeight: 600, fontSize: 15, border: `1px solid ${t.dueDot}40`, cursor: selectedAccounts.length ? 'pointer' : 'default', opacity: selectedAccounts.length ? 1 : 0.5 }}>
+              {tr('logout_selected_btn')}
             </button>
-            <button onClick={() => setShowLogout(false)} style={{ width: '100%', padding: '15px', borderRadius: 14, background: t.mutedSurface, color: t.text, fontWeight: 600, fontSize: 15, border: `1px solid ${t.cardBorder}`, cursor: 'pointer' }}>
+            <button type="button" onClick={() => setShowLogout(false)} style={{ width: '100%', padding: '14px', borderRadius: 14, background: t.mutedSurface, color: t.text, fontWeight: 600, fontSize: 15, border: `1px solid ${t.cardBorder}`, cursor: 'pointer' }}>
               {tr('btn_cancel')}
             </button>
           </div>

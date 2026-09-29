@@ -1,9 +1,13 @@
 import { useState } from 'react';
 import type { NavProps } from '../App';
-import { useTheme } from '../theme';
+import { useTheme, type AccentTone } from '../theme';
 import { useLang } from '../lang';
 
-const ACCENT_COLORS = ['#2E8060','#7A5EA0','#2D7A9E','#8A5E3A','#5E7A3A'];
+const ACCENT_COLORS: { tone: AccentTone; color: string; labelKey: 'pref_accent_green' | 'pref_accent_purple' | 'pref_accent_blue' }[] = [
+  { tone: 'green', color: '#2E8060', labelKey: 'pref_accent_green' },
+  { tone: 'purple', color: '#7A5EA0', labelKey: 'pref_accent_purple' },
+  { tone: 'blue', color: '#285A91', labelKey: 'pref_accent_blue' },
+];
 
 function Toggle({ on, onChange, primaryColor }: { on: boolean; onChange: (v: boolean) => void; primaryColor: string }) {
   return (
@@ -14,15 +18,15 @@ function Toggle({ on, onChange, primaryColor }: { on: boolean; onChange: (v: boo
 }
 
 export default function Preferences({ goBack }: NavProps) {
-  const { t, darkMode, setDarkMode } = useTheme();
-  const { tr } = useLang();
-  const [accentColor, setAccentColor] = useState(t.primary);
+  const { t, darkMode, setDarkMode, accentTone, setAccentTone } = useTheme();
+  const { tr, isRTL } = useLang();
+  const [pendingAccent, setPendingAccent] = useState<AccentTone>(accentTone);
 
   return (
     <div style={{ background: t.bg, minHeight: '100%', paddingBottom: 32, transition: 'background 0.3s' }}>
       <div style={{ padding: '14px 24px 0', marginBottom: 20 }}>
         <button onClick={goBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: 14 }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.primary} strokeWidth="2" strokeLinecap="round"><path d="M15 18l-6-6 6-6" /></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.primary} strokeWidth="2" strokeLinecap="round" style={{ transform: isRTL ? 'scaleX(-1)' : undefined }}><path d="M15 18l-6-6 6-6" /></svg>
           <span style={{ fontSize: 12, color: t.textMuted }}>{tr('app_name_upper')}</span>
         </button>
         <h1 style={{ fontSize: 24, fontWeight: 700, color: t.text, marginBottom: 4 }}>{tr('pref_title')}</h1>
@@ -45,15 +49,22 @@ export default function Preferences({ goBack }: NavProps) {
         <div style={{ padding: '16px 18px' }}>
           <p style={{ fontSize: 14, fontWeight: 500, color: t.text, marginBottom: 12 }}>{tr('pref_accent_tone')}</p>
           <div style={{ display: 'flex', gap: 10 }}>
-            {ACCENT_COLORS.map((color) => (
-              <button key={color} onClick={() => setAccentColor(color)} style={{ width: 30, height: 30, borderRadius: '50%', background: color, border: `3px solid ${accentColor === color ? t.text : 'transparent'}`, outline: accentColor === color ? `2px solid ${color}` : 'none', outlineOffset: 2, cursor: 'pointer', padding: 0, transition: 'outline 0.15s' }} />
+            {ACCENT_COLORS.map(({ tone, color, labelKey }) => (
+              <button key={tone} type="button" onClick={() => setPendingAccent(tone)} aria-label={tr(labelKey)} aria-pressed={pendingAccent === tone}
+                style={{ width: 30, height: 30, borderRadius: '50%', background: color, border: `3px solid ${pendingAccent === tone ? t.text : 'transparent'}`, outline: pendingAccent === tone ? `2px solid ${color}` : 'none', outlineOffset: 2, cursor: 'pointer', padding: 0, transition: 'outline 0.15s' }} />
             ))}
           </div>
+          {pendingAccent !== accentTone && (
+            <button type="button" onClick={() => setAccentTone(pendingAccent)}
+              style={{ width: '100%', marginTop: 18, padding: '12px 16px', border: 'none', borderRadius: 12, background: t.primary, color: t.primaryText, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+              {tr('pref_confirm_accent')}
+            </button>
+          )}
         </div>
       </div>
 
       {/* Dark mode hint */}
-      <div style={{ margin: '0 24px', background: darkMode ? t.primaryPale : '#E8F5EE', border: `1px solid ${t.primary}30`, borderRadius: 14, padding: '12px 16px', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+      <div style={{ margin: '0 24px', background: t.primaryPale, border: `1px solid ${t.primary}30`, borderRadius: 14, padding: '12px 16px', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={t.primary} strokeWidth="1.5" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 1 }}><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
         <p style={{ fontSize: 12, color: t.primary, lineHeight: 1.5 }}>
           {darkMode ? tr('pref_hint_dark_on') : tr('pref_hint_dark_off')}

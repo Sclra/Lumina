@@ -1,6 +1,7 @@
 import type { NavProps, PaymentType } from '../App';
 import { useTheme } from '../theme';
 import { useLang } from '../lang';
+import { formatMoney } from '../formatMoney';
 import { getPayment, paymentInfo, type MonthStatus } from '../data/payments';
 import { currentSolarDate, formatSolarMonth } from '../data/solarHijri';
 
@@ -47,7 +48,7 @@ export default function PaymentDetail({ navigate, goBack, params }: NavProps) {
                       <div style={{ width: 6, height: 6, borderRadius: '50%', background: dotColor(status), flexShrink: 0 }} />
                       <span style={{ fontSize: 10, fontWeight: 600, color: labelColor(status), letterSpacing: '0.04em' }}>{status === 'PAID' ? tr('word_paid') : status === 'DUE' ? tr('word_due') : tr('word_future')}</span>
                     </div>
-                    {status !== 'FUTURE' && <p style={{ fontSize: 11, color: t.textFaint, marginTop: 3 }}>${amount.toFixed(2)}</p>}
+                    {status !== 'FUTURE' && <p style={{ fontSize: 11, color: t.textFaint, marginTop: 3 }}>{formatMoney(amount.toFixed(2), lang)}</p>}
                   </div>
                 );
               })}

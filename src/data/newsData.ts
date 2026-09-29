@@ -44,7 +44,7 @@ export function compareNewsNewestFirst(a: NewsItem, b: NewsItem): number {
   return newsDateTimestamp(b.date) - newsDateTimestamp(a.date) || b.id - a.id;
 }
 
-export function displayNewsDate(value: string, lang: 'en' | 'fa', calendar: 'gregory' | 'persian' = 'gregory'): string {
+export function displayNewsDate(value: string, lang: 'en' | 'fa', calendar: 'gregory' | 'persian' = lang === 'fa' ? 'persian' : 'gregory'): string {
   if (lang === 'en' && calendar === 'gregory') return value;
   const date = parseNewsDate(value);
   return date ? new Intl.DateTimeFormat(lang === 'fa' ? 'fa-IR' : 'en-US', { calendar, day: 'numeric', month: 'long', year: 'numeric' }).format(date) : value;

@@ -33,7 +33,6 @@ export interface Unit {
   id: string;
   label: string;
   floor: number;
-  bedrooms: number;
   owner: string;
   email: string;
   status: UnitStatus;
@@ -96,11 +95,13 @@ interface ManagerCtx {
   switchUser: (user: CurrentUser) => void;
   clearCurrentUser: () => void;
   signOutUser: () => void;
+  signOutAccounts: (users: CurrentUser[]) => void;
   apartment: Apartment | null;
   createApartment: (a: Apartment) => void;
   units: Unit[];
   addUnit: (u: Omit<Unit, 'id'>) => void;
   updateUnit: (id: string, patch: Partial<Unit>) => void;
+  deleteUnit: (id: string) => void;
   charges: Charge[];
   addCharge: (c: Omit<Charge, 'id'>) => void;
   updateCharge: (id: string, patch: Partial<Charge>) => void;
@@ -148,9 +149,15 @@ export function ManagerProvider({ children }: { children: ReactNode }) {
   };
   const switchUser = (user: CurrentUser) => setCurrentUser(user);
   const clearCurrentUser = () => setCurrentUser(null);
+  const signOutAccounts = (users: CurrentUser[]) => {
+    const remaining = accounts.filter(account => !users.some(user => sameAccount(account, user)));
+    setAccounts(remaining);
+    setCurrentUser(current => current && remaining.some(account => sameAccount(account, current))
+      ? current : remaining[0] ?? null);
+  };
   const signOutUser = () => {
-    if (currentUser) setAccounts(prev => prev.filter(account => !sameAccount(account, currentUser)));
-    setCurrentUser(null);
+    if (currentUser) signOutAccounts([currentUser]);
+    else setCurrentUser(null);
   };
 
   const publicationTime = () => {
@@ -161,8 +168,14 @@ export function ManagerProvider({ children }: { children: ReactNode }) {
   const createApartment = (a: Apartment) => setApartment(a);
 
   const addUnit = (u: Omit<Unit, 'id'>) => setUnits(prev => [...prev, { ...u, id: genId() }]);
-  const updateUnit = (id: string, patch: Partial<Unit>) =>
+  const updateUnit = (id: string, patch: Partial<Unit>) => {
+    const previousLabel = units.find(u => u.id === id)?.label;
     setUnits(prev => prev.map(u => (u.id === id ? { ...u, ...patch } : u)));
+    if (patch.label && previousLabel && patch.label !== previousLabel) {
+      setCharges(prev => prev.map(c => c.target === previousLabel ? { ...c, target: patch.label! } : c));
+    }
+  };
+  const deleteUnit = (id: string) => setUnits(prev => prev.filter(u => u.id !== id));
 
   const addCharge = (c: Omit<Charge, 'id'>) => setCharges(prev => [{ ...c, id: genId() }, ...prev]);
   const updateCharge = (id: string, patch: Partial<Charge>) =>
@@ -189,9 +202,9 @@ export function ManagerProvider({ children }: { children: ReactNode }) {
 
   return (
     <ManagerContext.Provider value={{
-      currentUser, accounts, signInUser, switchUser, clearCurrentUser, signOutUser,
+      currentUser, accounts, signInUser, switchUser, clearCurrentUser, signOutUser, signOutAccounts,
       apartment, createApartment,
-      units, addUnit, updateUnit,
+      units, addUnit, updateUnit, deleteUnit,
       charges, addCharge, updateCharge,
       announcements, addAnnouncement,
       staff, addStaff, updateStaff,
